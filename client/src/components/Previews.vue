@@ -51,7 +51,10 @@
             </svg>
           </button>
           <audio class="audio">
-            <source src="@/assets/music/a-samurais-death.mp3" type="audio/mpeg" />
+            <source
+              src="@/assets/music/a-samurais-death.mp3"
+              type="audio/mpeg"
+            />
           </audio>
         </div>
         <div class="bottom">
