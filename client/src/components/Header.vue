@@ -1,12 +1,12 @@
 <template>
-  <div class="header">
+  <header class="header">
     <app-navbar></app-navbar>
     <div class="header-content-wrapper">
       <app-social></app-social>
       <app-search></app-search>
     </div>
     <app-scroll-cta></app-scroll-cta>
-  </div>
+  </header>
 </template>
 
 <script>
@@ -36,7 +36,6 @@ export default {
   background-repeat: no-repeat;
   background-position: center center;
   box-shadow: inset 1rem 3rem 10rem 1rem $color-black;
-  color: $color-white;
   padding: 3rem 6rem;
 
   @media (max-width: 680px) {

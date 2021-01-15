@@ -10,7 +10,7 @@
 .scroll-cta {
   display: flex;
   justify-content: center;
-  margin-bottom: 7rem;
+  margin-bottom: 10rem;
 
   .chevron {
     position: absolute;
