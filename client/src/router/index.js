@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-import Tracks from "../views/Tracks.vue";
+import Prods from "../views/Prods.vue";
 
 const routes = [
   {
@@ -9,11 +9,15 @@ const routes = [
     component: Home
   },
   {
-    path: "/tracks",
-    name: "Tracks",
-    component: Tracks
+    path: "/prods",
+    name: "Prods",
+    component: Prods
   }
 ];
+
+// routes.scrollBehavior = () => {
+//   return { x: 0, y: 0 }
+// }
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

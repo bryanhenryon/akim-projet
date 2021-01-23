@@ -4,7 +4,6 @@
     <div class="home__container">
       <app-previews></app-previews>
       <app-footer></app-footer>
-      <app-player></app-player>
     </div>
   </div>
 </template>
@@ -13,14 +12,12 @@
 import Header from "../components/Header";
 import Previews from "../components/Previews";
 import Footer from "../components/Footer";
-import Player from "../components/Player";
 
 export default {
   components: {
     "app-header": Header,
     "app-previews": Previews,
-    "app-footer": Footer,
-    "app-player": Player
+    "app-footer": Footer
   }
 };
 </script>

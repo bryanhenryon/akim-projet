@@ -8,7 +8,7 @@ module.exports = {
             @import "@/assets/scss/main.scss";
             `
       }
-    },
+    }
   },
-  outputDir: path.resolve(__dirname, '../public')
+  outputDir: path.resolve(__dirname, "../public")
 };

@@ -1,6 +1,6 @@
 <template>
   <header class="header">
-    <app-navbar></app-navbar>
+    <app-navbar />
     <div class="header-content-wrapper">
       <app-social></app-social>
       <app-search></app-search>
@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import Navbar from "./Header/Navbar";
+import Navbar from "./Navbar";
 import Social from "./Header/Social";
 import Search from "./Header/Search";
 import ScrollCTA from "./Header/ScrollCTA";

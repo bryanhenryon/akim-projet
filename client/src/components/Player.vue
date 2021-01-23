@@ -4,23 +4,23 @@
       <div class="track-infos">
         <div class="track-infos__image">
           <img
-            src="https://zerojackerzz.com/wp-content/uploads/2019/10/album-placeholder.png"
-            alt=""
+            src="/img/placeholder.jpg"
+            alt="Couverture du morceau"
             draggable="false"
           />
         </div>
         <div class="track-infos__container">
-          <div class="track-infos__track-name">Nom de l'artiste</div>
-          <div class="track-infos__artist-name">Nom du titre</div>
+          <div class="track-infos__track-name">Titre du morceau</div>
+          <div class="track-infos__artist-name">Artiste</div>
         </div>
       </div>
       <div class="controller">
-        <button class="btn btn--previous-track">
+        <button class="btn btn--previous-track" @click="previous">
           <svg class="icon icon-controller-jump-to-start">
             <use xlink:href="sprite.svg#icon-controller-jump-to-start"></use>
           </svg>
         </button>
-        <button class="btn btn--play2" @click="pouet">
+        <button class="btn btn--play2" @click="play">
           <svg class="icon icon-controller-play">
             <use xlink:href="sprite.svg#icon-controller-play"></use>
           </svg>
@@ -74,6 +74,7 @@
   transform: translateY(100vh);
   transition: transform 0.5s ease-in-out;
   padding: 0 6rem;
+  color: $color-white;
 
   @media (max-width: 680px) {
     padding: 0 2rem;

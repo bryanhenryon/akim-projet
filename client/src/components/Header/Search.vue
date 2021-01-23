@@ -4,7 +4,7 @@
       <h1>
         Phrase d'accroche importante pour le référencement
       </h1>
-      <form class="searchbar">
+      <form class="searchbar" @submit.prevent="search">
         <button type="submit">
           <svg class="icon icon-search">
             <use xlink:href="sprite.svg#icon-search"></use>
@@ -16,11 +16,32 @@
           spellcheck="false"
           class="searchbar-input"
           placeholder="Rechercher un artiste, un titre ou un genre"
+          v-model="searchValue"
         />
       </form>
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      searchValue: null
+    };
+  },
+  methods: {
+    search() {
+      const routeConfig = {
+        path: "/prods",
+        query: { search: this.searchValue }
+      };
+
+      this.$router.push(routeConfig);
+    }
+  }
+};
+</script>
 
 <style lang="scss" scoped>
 .content-container {

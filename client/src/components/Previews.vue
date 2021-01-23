@@ -2,16 +2,12 @@
   <section class="previews">
     <div class="section-title">
       <h2 class="news">Derniers ajouts</h2>
-      <router-link to="/tracks" class="btn btn--see-all">Tout voir</router-link>
+      <router-link to="/prods" class="btn btn--see-all">Tout voir</router-link>
     </div>
     <div class="cards">
-      <div class="card">
+      <div class="card" v-for="(prod, index) of latestProds" :key="index">
         <div class="image">
-          <img
-            src="https://i.pinimg.com/originals/b4/75/00/b4750046d94fed05d00dd849aa5f0ab7.jpg"
-            draggable="false"
-            alt=""
-          />
+          <img :src="'/img/' + prod.cover" draggable="false" alt="" />
           <button class="btn btn--play" @click="play">
             <svg class="icon icon-controller-play">
               <use xlink:href="sprite.svg#icon-controller-play"></use>
@@ -26,144 +22,11 @@
         </div>
         <div class="bottom">
           <div class="infos">
-            <div class="title">Titre du beat</div>
-            <div class="author">Auteur du beat</div>
+            <div class="title">{{ prod.title }}</div>
+            <div class="author">{{ prod.artist }}</div>
           </div>
           <button class="btn btn--buy">
-            <span>23, 99€</span>
-            <svg class="icon icon-shopping-cart">
-              <use xlink:href="sprite.svg#icon-shopping-cart"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="image">
-          <img
-            src="https://99designs-blog.imgix.net/blog/wp-content/uploads/2017/12/attachment_68585523.jpg?auto=format&q=60&fit=max&w=930"
-            draggable="false"
-            alt=""
-          />
-          <button class="btn btn--play" @click="play">
-            <svg class="icon icon-controller-play">
-              <use xlink:href="sprite.svg#icon-controller-play"></use>
-            </svg>
-            <svg class="icon icon-pause">
-              <use xlink:href="sprite.svg#icon-pause"></use>
-            </svg>
-          </button>
-          <audio class="audio">
-            <source
-              src="@/assets/music/a-samurais-death.mp3"
-              type="audio/mpeg"
-            />
-          </audio>
-        </div>
-        <div class="bottom">
-          <div class="infos">
-            <div class="title">Titre du beat2</div>
-            <div class="author">Auteur du beat2</div>
-          </div>
-          <button class="btn btn--buy">
-            <span>23, 99€</span>
-            <svg class="icon icon-shopping-cart">
-              <use xlink:href="sprite.svg#icon-shopping-cart"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img
-            src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/rose-mixtape-album-cover-art-template-design-59c928b377e5f0e8e9aabc4982ca7e14_screen.jpg?ts=1588828036"
-            draggable="false"
-            alt=""
-          />
-          <button class="btn btn--play" @click="play">
-            <svg class="icon icon-controller-play">
-              <use xlink:href="sprite.svg#icon-controller-play"></use>
-            </svg>
-            <svg class="icon icon-pause">
-              <use xlink:href="sprite.svg#icon-pause"></use>
-            </svg>
-          </button>
-          <audio class="audio">
-            <source src="@/assets/music/mask-off.mp3" type="audio/mpeg" />
-          </audio>
-        </div>
-        <div class="bottom">
-          <div class="infos">
-            <div class="title">Titre du beat</div>
-            <div class="author">Auteur du beat</div>
-          </div>
-          <button class="btn btn--buy">
-            <span>23, 99€</span>
-            <svg class="icon icon-shopping-cart">
-              <use xlink:href="sprite.svg#icon-shopping-cart"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="image">
-          <img
-            src="https://images-na.ssl-images-amazon.com/images/I/717VbeZb0bL._AC_SX466_.jpg"
-            draggable="false"
-            alt=""
-          />
-          <button class="btn btn--play" @click="play">
-            <svg class="icon icon-controller-play">
-              <use xlink:href="sprite.svg#icon-controller-play"></use>
-            </svg>
-            <svg class="icon icon-pause">
-              <use xlink:href="sprite.svg#icon-pause"></use>
-            </svg>
-          </button>
-          <audio class="audio">
-            <source src="@/assets/music/decouverte.mp3" type="audio/mpeg" />
-          </audio>
-        </div>
-        <div class="bottom">
-          <div class="infos">
-            <div class="title">Titre du beat</div>
-            <div class="author">Auteur du beat</div>
-          </div>
-          <button class="btn btn--buy">
-            <span>23, 99€</span>
-            <svg class="icon icon-shopping-cart">
-              <use xlink:href="sprite.svg#icon-shopping-cart"></use>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="card">
-        <div class="image">
-          <img
-            src="https://zerojackerzz.com/wp-content/uploads/2019/10/album-placeholder.png"
-            draggable="false"
-            alt=""
-          />
-          <button class="btn btn--play" @click="play">
-            <svg class="icon icon-controller-play">
-              <use xlink:href="sprite.svg#icon-controller-play"></use>
-            </svg>
-            <svg class="icon icon-pause">
-              <use xlink:href="sprite.svg#icon-pause"></use>
-            </svg>
-          </button>
-          <audio class="audio">
-            <source src="@/assets/music/sweaters.mp3" type="audio/mpeg" />
-          </audio>
-        </div>
-        <div class="bottom">
-          <div class="infos">
-            <div class="title">Titre du beat</div>
-            <div class="author">Auteur du beat</div>
-          </div>
-          <button class="btn btn--buy">
-            <span>23, 99€</span>
+            <span>{{ prod.price }}€</span>
             <svg class="icon icon-shopping-cart">
               <use xlink:href="sprite.svg#icon-shopping-cart"></use>
             </svg>
@@ -171,18 +34,40 @@
         </div>
       </div>
     </div>
-    <router-link to="/tracks" class="btn btn--see-all--secondary"
+    <router-link to="/prods" class="btn btn--see-all--secondary"
       >Tout voir</router-link
     >
   </section>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
+  data() {
+    return {
+      latestProds: null
+    };
+  },
   methods: {
     play() {
       document.querySelector(".player").classList.add("playing");
     }
+  },
+  created() {
+    axios
+      .get("/api/prods")
+      .then(res => {
+        const data = res.data;
+        const sortedData = data.sort((a, b) =>
+          b.createdAt > a.createdAt ? 1 : -1
+        );
+        const slicedData = sortedData.slice(0, 5);
+        this.latestProds = slicedData;
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 };
 </script>
