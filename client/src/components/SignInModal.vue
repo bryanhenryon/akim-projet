@@ -25,6 +25,7 @@
               id="sign-in-username"
               class="sign-in-modal__text-input"
               placeholder="Entrez votre pseudo"
+              v-model="username"
             />
           </div>
 
@@ -41,13 +42,21 @@
               id="sign-in-password"
               class="sign-in-modal__text-input"
               placeholder="Entrez votre mot de passe"
+              v-model="password"
             />
           </div>
-          <button class="btn sign-in-modal__sign-in-btn">Se connecter</button>
+          <button class="btn sign-in-modal__sign-in-btn" @click="signIn">
+            Se connecter
+          </button>
         </form>
         <div class="sign-in-modal__not-registered">
           Pas encore inscris ?
-          <button class="btn sign-in-modal__sign-up-btn">Cliquez-ici !</button>
+          <button
+            class="btn sign-in-modal__sign-up-btn"
+            @click="showSignUpModal"
+          >
+            Cliquez-ici !
+          </button>
         </div>
 
         <a href="#" class="sign-in-modal__forgotten-password"
@@ -59,13 +68,67 @@
 </template>
 
 <script>
+import axios from "axios";
 import "animate.css";
 export default {
-    methods: {
-        closeSignInModal() {
-            document.querySelector(".sign-in-modal").classList.remove("active");
-        }
+  data() {
+    return {
+      username: "",
+      password: ""
+    };
+  },
+  methods: {
+    signIn() {
+      axios
+        .post("/api/users/login", {
+          username: this.username,
+          password: this.password
+        })
+        .then(res => {
+          localStorage.setItem("jwt", res.data.token);
+          localStorage.setItem("user", JSON.stringify(res.data.user));
+
+          this.$store.commit("setToken", localStorage.getItem("jwt"));
+          this.$store.commit(
+            "setUser",
+            JSON.parse(localStorage.getItem("user"))
+          );
+
+          const signInModal = document.querySelector(".sign-in-modal");
+          signInModal.classList.remove("active");
+        })
+        .catch();
+    },
+    closeSignInModal() {
+      document.querySelector(".sign-in-modal").classList.remove("active");
+    },
+    showSignUpModal() {
+      const signUpModal = document.querySelector(".sign-up-modal");
+      const signUpModalContent = document.querySelector(
+        ".sign-up-modal__content"
+      );
+      const signInModal = document.querySelector(".sign-in-modal");
+
+      signUpModalContent.classList.remove(
+        "animate__animated",
+        "animate__slideInDown",
+        "animate__faster"
+      );
+
+      signInModal.classList.remove("active");
+      signUpModal.classList.add("active");
+
+      if (signUpModal.classList.contains("active")) {
+        window.addEventListener("click", e => {
+          if (e.target === signUpModal) {
+            signUpModal.classList.remove("active");
+          } else {
+            return false;
+          }
+        });
+      }
     }
+  }
 };
 </script>
 
@@ -210,7 +273,7 @@ export default {
     text-decoration: none;
 
     &:hover {
-        text-decoration: underline;
+      text-decoration: underline;
     }
   }
 }

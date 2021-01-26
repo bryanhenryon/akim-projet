@@ -22,9 +22,13 @@ router.get("/api/prods", async (req, res) => {
 });
 
 router.post("/api/prods", async (req, res) => {
-    const prod = new Prods(req.body);
-    await prod.save();
-    res.send("Ca a marché");
+    try {
+        const prod = new Prods(req.body);
+        await prod.save();
+        res.send("Ca a marché");
+    } catch(error) {
+        console.log(error);
+    }
 });
 
 module.exports = router;

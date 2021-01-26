@@ -1,12 +1,17 @@
+const cors = require("cors");
 const express = require("express");
 const app = express();
 require("./models/mongoose");
 const prodsRouter = require("./routes/prods");
 const usersRouter = require("./routes/users");
+const cookieParser = require("cookie-parser");
+require('dotenv').config();
 
+app.use(cors());
 app.use(express.static(__dirname + '/public/'));
 app.use(express.json());
 app.use(prodsRouter, usersRouter);
+app.use(cookieParser());
 
 app.get(/.*/, (req, res) => {
     res.sendFile(__dirname + '/public/index.html')

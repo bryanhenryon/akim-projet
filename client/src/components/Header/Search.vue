@@ -15,7 +15,7 @@
           name=""
           spellcheck="false"
           class="searchbar-input"
-          placeholder="Rechercher un artiste, un titre ou un genre"
+          placeholder="Rechercher un morceau ou un artiste"
           v-model="searchValue"
         />
       </form>

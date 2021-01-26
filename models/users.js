@@ -1,25 +1,60 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const usersSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
     trim: true,
-    maxlength: 30,
+    maxLength: 20,
     unique: true
   },
   email: {
     type: String,
     required: true,
     trim: true,
-    unique: true
+    unique: true,
+    validate(value) {
+      const regex = new RegExp(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+      const checkedEmail = regex.test(value);
+
+      if(!checkedEmail) throw new Error("Email invalide");
+    }
   },
   password: {
     type: String,
     required: true,
-    trim: true
+    trim: true,
+    minLength: 6
   }
 }, { timestamps: true });
+
+usersSchema.statics.findByCredentials = async (username, password) => {
+  const user = await Users.findOne({ username });
+
+  if(!user) {
+    throw new Error("Les identifiants sont incorrects");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if(!isMatch) {
+    throw new Error("Les identifiants sont incorrects");
+  }
+
+  return user;
+}
+
+usersSchema.pre('save', async function(next) {
+  if(this.isModified("password")) {
+      this.password = await bcrypt.hash(this.password, 10);
+  }
+
+  next();
+});
+
 
 const Users = mongoose.model("Users", usersSchema);
 

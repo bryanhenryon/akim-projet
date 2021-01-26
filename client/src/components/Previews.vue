@@ -17,13 +17,25 @@
             </svg>
           </button>
           <audio class="audio">
-            <source src="@/assets/music/sweaters.mp3" type="audio/mpeg" />
+            <source :src="'music/' + prod.song" type="audio/mpeg" />
           </audio>
         </div>
         <div class="bottom">
           <div class="infos">
-            <div class="title">{{ prod.title }}</div>
-            <div class="author">{{ prod.artist }}</div>
+            <div class="title">
+              <router-link
+                class="title-link"
+                :to="'/profil/' + prod.title.toLowerCase()"
+                >{{ prod.title }}</router-link
+              >
+            </div>
+            <div class="author">
+              <router-link
+                class="author-profile-link"
+                :to="'/profil/' + prod.artist.toLowerCase()"
+                >{{ prod.artist }}</router-link
+              >
+            </div>
           </div>
           <button class="btn btn--buy">
             <span>{{ prod.price }}€</span>
@@ -50,8 +62,38 @@ export default {
     };
   },
   methods: {
-    play() {
+    play(e) {
       document.querySelector(".player").classList.add("playing");
+      document.querySelector(".btn--play2").classList.add("playing");
+
+      const audio = e.currentTarget.nextSibling;
+      const allBtn = document.querySelectorAll(".btn--play");
+      const isPlaying = e.currentTarget.classList.contains("active");
+
+      for (const btn of allBtn) {
+        if (btn.classList.contains("active")) {
+          btn.classList.remove("active");
+          btn.nextSibling.pause();
+        }
+
+        if (btn !== e.currentTarget) {
+          btn.nextSibling.currentTime = 0;
+        }
+      }
+
+      if (isPlaying) {
+        e.currentTarget.classList.remove("active");
+        document.querySelector(".btn--play2").classList.remove("playing");
+        audio.pause();
+      } else {
+        e.currentTarget.classList.add("active");
+        audio.play();
+        if (
+          document.querySelector(".btn--sound").classList.contains("active")
+        ) {
+          audio.muted = true;
+        }
+      }
     }
   },
   created() {
@@ -206,6 +248,16 @@ export default {
 
           .author {
             font-size: 1.4rem;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+
+          .title-link,
+          .author-profile-link {
+            color: $color-white;
+            text-decoration: none;
 
             &:hover {
               text-decoration: underline;

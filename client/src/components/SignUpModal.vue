@@ -1,8 +1,6 @@
 <template>
   <div class="sign-up-modal">
-    <div
-      class="sign-up-modal__content  animate__animated animate__slideInDown animate__faster"
-    >
+    <div class="sign-up-modal__content">
       <button
         class="btn sign-up-modal__close-modal-btn"
         @click="closeSignUpModal"
@@ -163,7 +161,16 @@ export default {
             password: this.password,
             confirmPassword: this.confirmPassword
           })
-          .then(() => {
+          .then(res => {
+            localStorage.setItem("jwt", res.data.token);
+            localStorage.setItem("user", JSON.stringify(res.data.user));
+
+            this.$store.commit("setToken", localStorage.getItem("jwt"));
+            this.$store.commit(
+              "setUser",
+              JSON.parse(localStorage.getItem("user"))
+            );
+
             const signUpModal = document.querySelector(".sign-up-modal");
             signUpModal.classList.remove("active");
           })
@@ -255,7 +262,16 @@ export default {
     },
     showSignInModal() {
       const signInModal = document.querySelector(".sign-in-modal");
+      const signInModalContent = document.querySelector(
+        ".sign-in-modal__content"
+      );
       const signUpModal = document.querySelector(".sign-up-modal");
+
+      signInModalContent.classList.remove(
+        "animate__animated",
+        "animate__slideInDown",
+        "animate__faster"
+      );
 
       signInModal.classList.add("active");
       signUpModal.classList.remove("active");
