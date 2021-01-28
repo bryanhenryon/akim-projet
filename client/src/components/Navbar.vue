@@ -12,7 +12,7 @@
       <button v-if="!jwt" class="btn btn-buy" @click="showSignUpModal">
         Achète des prods
       </button>
-      <button v-if="!jwt" class="btn btn-sell">
+      <button v-if="!jwt" class="btn btn-sell" @click="showSignUpModal">
         Vends des prods
       </button>
       <div class="navbar__profile">
@@ -24,23 +24,31 @@
           <div class="navbar__user-img-container">
             <img
               class="navbar__user-img"
-              src="https://www.randomlists.com/img/people/winston_churchill.webp"
+              :src="'img/' + user.profilePicture"
               alt="Image de profil"
             />
           </div>
           <p v-if="user">{{ user.username }}</p>
-          <svg class="icon icon-chevron-down">
+          <svg class="icon icon-chevron-down--profile-dropdown-btn">
             <use xlink:href="sprite.svg#icon-chevron-down"></use>
           </svg>
         </button>
         <div class="navbar__user-profile-dropdown-menu" v-if="jwt">
           <ul>
             <li>
-              <router-link :to="'/profil/' + user.username.toLowerCase()"
-                >Profil</router-link
-              >
+              <router-link :to="'/profil/' + user.username.toLowerCase()">
+                <svg class="icon icon-user">
+                  <use xlink:href="sprite.svg#icon-user"></use>
+                </svg>
+                Profil
+              </router-link>
             </li>
-            <li @click="logout">Déconnexion</li>
+            <li @click="logout">
+              <svg class="icon icon-switch">
+                <use xlink:href="sprite.svg#icon-switch"></use>
+              </svg>
+              Déconnexion
+            </li>
           </ul>
         </div>
       </div>
@@ -110,33 +118,31 @@ export default {
         });
       }
     },
-    showDropdownMenu() {
-      const profileBtn = document.querySelector(
-        ".navbar__user-profile-dropdown-btn"
-      );
+    showDropdownMenu(e) {
+      const currentTarget = e.currentTarget;
+
       const profileDropdownMenu = document.querySelector(
         ".navbar__user-profile-dropdown-menu"
       );
-      const iconChevronDown = document.querySelector(".icon-chevron-down");
+      const iconChevronDown = document.querySelector(
+        ".icon-chevron-down--profile-dropdown-btn"
+      );
 
-      profileBtn.classList.toggle("active");
+      currentTarget.classList.toggle("active");
 
-      if (profileBtn.classList.contains("active")) {
+      if (currentTarget.classList.contains("active")) {
         iconChevronDown.style.transform = "rotate(180deg)";
         profileDropdownMenu.style.display = "block";
 
-        // window.addEventListener("click", e => {
-        //   if (e.target !== profileBtn) {
-        //     console.log("ça déconne ici");
-        //     profileBtn.classList.remove("active");
-        //     iconChevronDown.style.transform = "rotate(0)";
-        //     profileDropdownMenu.style.display = "none";
-        //   } else {
-        //     false;
-        //   }
-        // });
-
-        // Ne pas oublier de fixer la flèche qui reste vers le haut quand on clique sur déconnexion
+        window.addEventListener("click", e => {
+          if (e.target !== currentTarget) {
+            currentTarget.classList.remove("active");
+            iconChevronDown.style.transform = "rotate(0)";
+            profileDropdownMenu.style.display = "none";
+          } else {
+            false;
+          }
+        });
       } else {
         iconChevronDown.style.transform = "rotate(0)";
         profileDropdownMenu.style.display = "none";
@@ -169,7 +175,7 @@ export default {
   }
 
   &_buttons {
-    @media (max-width: 768px) {
+    @media (max-width: 960px) {
       display: none;
     }
   }
@@ -178,7 +184,7 @@ export default {
     display: none;
     padding: 0 !important;
 
-    @media (max-width: 768px) {
+    @media (max-width: 960px) {
       display: block;
     }
 
@@ -188,8 +194,12 @@ export default {
       width: 4rem;
     }
   }
-
-  .btn {
+  .btn-buy {
+    margin-right: 5rem;
+    background: $color-white;
+    color: $color-black;
+    text-transform: uppercase;
+    padding: 1.2rem 2rem;
     transition: 0.2s ease-out;
     letter-spacing: 1px;
     font-size: 1.6rem;
@@ -197,22 +207,10 @@ export default {
     @media (max-width: 1024px) {
       font-size: 1.4rem;
     }
-  }
 
-  .btn:hover {
-    letter-spacing: 2px;
-  }
-
-  &__sign-in-btn {
-    margin-right: 5rem;
-  }
-
-  .btn-buy {
-    margin-right: 5rem;
-    background: $color-white;
-    color: $color-black;
-    text-transform: uppercase;
-    padding: 1.2rem 2rem;
+    &:hover {
+      letter-spacing: 2px;
+    }
   }
 
   .btn-sell {
@@ -221,10 +219,34 @@ export default {
     border: 1px solid $color-white;
     text-transform: uppercase;
     padding: 1.2rem 2rem;
+    transition: 0.2s ease-out;
+    letter-spacing: 1px;
+    font-size: 1.6rem;
+
+    @media (max-width: 1024px) {
+      font-size: 1.4rem;
+    }
+
+    &:hover {
+      letter-spacing: 2px;
+    }
   }
 
   &__sign-in-btn {
     padding: 0;
+    margin-right: 5rem;
+    font-size: 1.6rem;
+    padding: 1.2rem 2rem;
+    transition: 0.2s ease-out;
+    letter-spacing: 1px;
+
+    &:hover {
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 1024px) {
+      font-size: 1.4rem;
+    }
   }
 
   &__profile {
@@ -236,8 +258,8 @@ export default {
     align-items: center;
     font-size: 1.8rem;
 
-    &:hover {
-      letter-spacing: 1px;
+    * {
+      pointer-events: none;
     }
   }
 
@@ -249,22 +271,37 @@ export default {
     margin-right: 1.5rem;
   }
 
-  .icon-chevron-down {
+  .icon-chevron-down--profile-dropdown-btn {
     fill: $color-white;
     height: 2rem;
     width: 2rem;
     margin-left: 0.5rem;
+    transition: transform 0.1s ease-in-out;
   }
 
   &__user-profile-dropdown-menu {
     display: none;
     position: absolute;
     z-index: 100;
-    left: -10px;
+    left: -50px;
     right: -10px;
     top: 60px;
     background: #262626;
     border-radius: 0.5rem;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 70%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 10px solid #262626;
+      background: transparent;
+    }
 
     ul {
       list-style: none;
@@ -276,9 +313,25 @@ export default {
         padding: 1rem 2rem;
         font-size: 1.5rem;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+
+        .icon-switch,
+        .icon-user {
+          width: 16px;
+          height: 16px;
+          fill: $color-white;
+          margin-right: 10px;
+        }
 
         &:hover {
           font-weight: 500;
+        }
+
+        a {
+          color: inherit;
+          text-decoration: none;
+          width:100%;
         }
       }
     }

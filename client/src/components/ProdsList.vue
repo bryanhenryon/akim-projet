@@ -148,6 +148,7 @@
                 >{{ prod.artist }}</router-link
               >
             </div>
+            <div class="max-streams">Streams max: 100k</div>
           </div>
           <button class="btn btn--buy" @click="buyProd">
             <span>{{ prod.price }}€</span>
@@ -248,7 +249,7 @@ export default {
         if (radio.checked) {
           if (radio.value !== "all") {
             axios
-              .get("/api/prods", {
+              .get("http://localhost:3000/api/prods", {
                 params: {
                   search: this.searchParams
                 }
@@ -273,7 +274,7 @@ export default {
               });
           } else {
             axios
-              .get("/api/prods")
+              .get("http://localhost:3000/api/prods")
               .then(res => {
                 const prods = res.data;
                 prods.length === 0
@@ -530,6 +531,10 @@ export default {
     background: #262626;
     color: $color-white;
 
+    * {
+      pointer-events: none;
+    }
+
     @media (max-width: 1024px) {
       margin-top: 2rem;
       width: 100%;
@@ -671,7 +676,6 @@ export default {
 
 .cards {
   display: flex;
-  justify-content: space-evenly;
   flex-wrap: wrap;
 
   .no-results {
@@ -681,7 +685,7 @@ export default {
   .card {
     border-radius: 3px;
     width: 250px;
-    margin: 4rem 2rem;
+    margin: 4rem 3rem;
 
     .image {
       border-radius: 2px;
@@ -763,10 +767,16 @@ export default {
 
         .author {
           font-size: 1.4rem;
+          margin-bottom: 0.5rem;
 
           &:hover {
             text-decoration: underline;
           }
+        }
+
+        .max-streams {
+          font-size: 1.3rem;
+          letter-spacing: 0.5px;
         }
       }
 

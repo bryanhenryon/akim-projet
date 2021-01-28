@@ -36,6 +36,7 @@
                 >{{ prod.artist }}</router-link
               >
             </div>
+            <div class="max-streams">Streams max: 100k</div>
           </div>
           <button class="btn btn--buy">
             <span>{{ prod.price }}€</span>
@@ -248,10 +249,16 @@ export default {
 
           .author {
             font-size: 1.4rem;
+            margin-bottom: 0.5rem;
 
             &:hover {
               text-decoration: underline;
             }
+          }
+
+          .max-streams {
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
           }
 
           .title-link,

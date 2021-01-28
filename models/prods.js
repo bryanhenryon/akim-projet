@@ -30,6 +30,10 @@ const prodsSchema = new mongoose.Schema({
       type: String,
       required: true
   },
+  maxStreams: {
+    type: Number,
+    required: true
+  }
 }, { timestamps: true });
 
 const Prods = mongoose.model("Prods", prodsSchema);

@@ -28,6 +28,11 @@ const usersSchema = new mongoose.Schema({
     required: true,
     trim: true,
     minLength: 6
+  },
+  profilePicture: {
+    type: String,
+    default: "profile-picture-placeholder.png"
+    
   }
 }, { timestamps: true });
 
