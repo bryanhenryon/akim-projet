@@ -680,6 +680,8 @@ export default {
 
   .no-results {
     margin-top: 10rem;
+    width: 100%;
+    text-align:center;
   }
 
   .card {
