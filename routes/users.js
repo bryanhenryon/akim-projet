@@ -18,7 +18,6 @@ router.get("/api/users", async (req, res) => {
 });
 
 router.get("/api/users/:username", async (req, res) => {
-    console.log(req.body);
     const users = await Users.findOne({username: { $regex : new RegExp(req.params.username, "i") }});
     const stringified = JSON.stringify(users, null, 2);
     res.type('json').send(stringified);
@@ -29,7 +28,6 @@ router.post("/api/users", async (req, res) => {
         const user = await new Users(req.body);
         await user.save();
         const token = createToken(user);
-        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.status(201).send({
             user,
             token
@@ -43,7 +41,6 @@ router.post("/api/users/login", async (req, res) => {
     try {
         const user = await Users.findByCredentials(req.body.username, req.body.password);
         const token = createToken(user._id);
-        res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
         res.status(200).send({
             user,
             token

@@ -23,6 +23,36 @@ const usersSchema = new mongoose.Schema({
       if(!checkedEmail) throw new Error("Email invalide");
     }
   },
+  description:  {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  soundcloud: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  instagram: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  youtube: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  twitter: {
+    type: String,
+    trim: true,
+    default: ""
+  },
+  facebook: {
+    type: String,
+    trim: true,
+    default: ""
+  },
   password: {
     type: String,
     required: true,
@@ -37,7 +67,9 @@ const usersSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 usersSchema.statics.findByCredentials = async (username, password) => {
-  const user = await Users.findOne({ username });
+  const user = await Users.findOne({ 
+    username: { $regex : new RegExp(username, "i") }
+   });
 
   if(!user) {
     throw new Error("Les identifiants sont incorrects");

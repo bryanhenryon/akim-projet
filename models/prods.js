@@ -12,6 +12,9 @@ const prodsSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  format: {
+    type: String,
+  },
   artist: {
     type: String,
     required: true,
@@ -22,17 +25,16 @@ const prodsSchema = new mongoose.Schema({
     trim: true,
     default: "placeholder.jpg"
   },
-  genres: {
-    type: [String],
-    required: true
+  tags: {
+    type: [String]
   },
   price: {
       type: String,
       required: true
   },
   maxStreams: {
-    type: Number,
-    required: true
+    type: String,
+    default: "illimité"
   }
 }, { timestamps: true });
 

@@ -208,7 +208,7 @@ export default {
     searchProd(e) {
       const searchValue = e.target.value.toLowerCase();
       axios
-        .get("/api/prods")
+        .get("http://localhost:3000/" || "/api/prods")
         .then(res => {
           const prods = res.data;
 
@@ -249,7 +249,7 @@ export default {
         if (radio.checked) {
           if (radio.value !== "all") {
             axios
-              .get("/api/prods", {
+              .get("http://localhost:3000/api/prods" || "/api/prods", {
                 params: {
                   search: this.searchParams
                 }
@@ -257,7 +257,7 @@ export default {
               .then(res => {
                 const prods = res.data;
                 const filteredProds = prods.filter(prod =>
-                  prod.genres.includes(radio.value)
+                  prod.tags.includes(radio.value)
                 );
 
                 this.prods = filteredProds;
@@ -274,7 +274,7 @@ export default {
               });
           } else {
             axios
-              .get("/api/prods")
+              .get("http://localhost:3000/api/prods" || "/api/prods")
               .then(res => {
                 const prods = res.data;
                 prods.length === 0
@@ -295,7 +295,7 @@ export default {
     },
     sortByLatest() {
       axios
-        .get("/api/prods")
+        .get("http://localhost:3000/api/prods" || "/api/prods")
         .then(res => {
           const prods = res.data;
           prods.length === 0
@@ -312,7 +312,7 @@ export default {
     },
     sortByOldest() {
       axios
-        .get("/api/prods")
+        .get("http://localhost:3000/api/prods" || "/api/prods")
         .then(res => {
           const prods = res.data;
           prods.length === 0
@@ -364,7 +364,7 @@ export default {
   },
   created() {
     axios
-      .get("/api/prods", {
+      .get("http://localhost:3000/api/prods" || "/api/prods", {
         params: {
           search: this.$route.query.search
         }

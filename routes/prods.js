@@ -24,6 +24,19 @@ router.get("/api/prods", async (req, res) => {
     }
 });
 
+router.get("/api/prods/:username", async (req, res) => {
+    try {
+        const prods = await Prods.find({
+            artist: { $regex : new RegExp(req.params.username, "i") } 
+        });
+
+        const stringified = JSON.stringify(prods, null, 2);
+        res.type('json').send(stringified);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         if(file.fieldname === "cover") {
@@ -51,7 +64,7 @@ const storage = multer.diskStorage({
 
         if(file.fieldname === "song") {
             if(!file.originalname.match(/\.(mp3|wav)$/)) {
-                return cb(new Error("Veuillez indiquer un fichier au format .mp3 ou .wav"))
+                return cb(new Error("Veuillez indiquer un fichier au format .mp3 ou .wav"));
             }
     
             cb(undefined, true);
@@ -71,6 +84,9 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
         }
 
         if(req.files.song && req.files.song[0].fieldname === "song") {
+            const extname = path.extname(req.files.song[0].filename).replace(".", ""); // Récupère l'extension du fichier sans le "." 
+            req.body.format = extname;
+
             if(req.files.song[0].size > 1024 * 1024 * 50) {
                 res.status(400).json({error: "Le fichier est trop volumineux, 50 Mo maximum autorisés"});
                 return;
@@ -85,5 +101,4 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
         console.log(error);
     }
 });
-
 module.exports = router;
