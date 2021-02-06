@@ -51,33 +51,90 @@
           </a>
         </li>
       </ul>
-    </div>
 
-    <div class="d-flex justify-content-end">
-      <div class="sort-by">
-        <button class="btn btn--sort-by" @click="showDropdownMenu">
-          Trier par
-          <svg class="icon icon-chevron-down">
-            <use xlink:href="sprite.svg#icon-chevron-down"></use>
-          </svg>
-        </button>
-        <div class="sort-by-content">
-          <ul>
-            <li>Les meilleures ventes</li>
-            <li @click="sortByLatest">Les plus récents</li>
-            <li @click="sortByOldest">Les plus anciens</li>
-          </ul>
+      <div
+        v-if="sessionUser && user.username === sessionUser.username"
+        class="profile__my-infos"
+      >
+        <router-link to="/compte/infos">Modifier mes informations</router-link>
+      </div>
+    </div>
+    <div v-if="!noProd" class="mt-10">
+      <router-link
+        v-if="!noProd && sessionUser && user.username === sessionUser.username"
+        to="/compte/prods"
+        class="btn btn--manage-prods"
+        >Gérer mes prods
+      </router-link>
+      <div v-if="!noProd" class="utils-container">
+        <div class="search-filter">
+          <div class="searchbar">
+            <button class="btn btn--search">
+              <svg class="icon icon-search">
+                <use xlink:href="sprite.svg#icon-search"></use>
+              </svg>
+            </button>
+            <input
+              type="text"
+              name=""
+              spellcheck="false"
+              class="searchbar-input"
+              placeholder="Rechercher un morceau"
+              @keyup="searchProd"
+            />
+          </div>
+        </div>
+        <div class="sort-by">
+          <button class="btn btn--sort-by" @click="showDropdownMenu">
+            Trier par
+            <svg class="icon icon-chevron-down">
+              <use xlink:href="sprite.svg#icon-chevron-down"></use>
+            </svg>
+          </button>
+          <div class="sort-by-content ">
+            <ul>
+              <li>Les meilleures ventes</li>
+              <li @click="sortByLatest">Les plus récents</li>
+              <li @click="sortByOldest">Les plus anciens</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
     <div class="cards">
-      <div class="no-results" v-if="noResults">
+      <div class="no-result" v-if="noResult">
+        Aucun résultat
+      </div>
+      <div
+        class="no-result"
+        v-if="
+          (noProd && sessionUser && user.username !== sessionUser.username) ||
+            (noProd && !sessionUser)
+        "
+      >
         {{ user.username }} n'a aucune prod à présenter pour le moment
+      </div>
+      <div
+        class="no-prod"
+        v-if="noProd && sessionUser && user.username === sessionUser.username"
+      >
+        <p class="no-prod__message">
+          Vous n'avez aucune prod à présenter pour le moment
+        </p>
+        <router-link to="/compte/prods/ajouter" class="btn btn--add-prod">
+          <svg class="icon icon-plus">
+            <use xlink:href="sprite.svg#icon-plus"></use>
+          </svg>
+          Ajouter une prod
+        </router-link>
       </div>
       <div class="card" v-for="(prod, index) of prods" :key="index">
         <div class="image">
           <img
-            :src="'img/' + prod.cover"
+            :src="
+              'http://localhost:3000/api/prods/images/' + prod.cover ||
+                '/api/prods/images/' + prod.cover
+            "
             draggable="false"
             alt="Couverture de la prod"
           />
@@ -137,7 +194,8 @@ export default {
     return {
       user: "",
       prods: null,
-      noResults: null
+      noProd: null,
+      noResult: null
     };
   },
   computed: {
@@ -188,9 +246,6 @@ export default {
         )
         .then(res => {
           const prods = res.data;
-          prods.length === 0
-            ? (this.noResults = true)
-            : (this.noResults = false);
           const sortedProds = prods.sort((a, b) =>
             b.createdAt > a.createdAt ? 1 : -1
           );
@@ -208,13 +263,37 @@ export default {
         )
         .then(res => {
           const prods = res.data;
-          prods.length === 0
-            ? (this.noResults = true)
-            : (this.noResults = false);
           const sortedProds = prods.sort((a, b) =>
             a.createdAt > b.createdAt ? 1 : -1
           );
           this.prods = sortedProds;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    searchProd(e) {
+      const searchValue = e.target.value.toLowerCase();
+      axios
+        .get(
+          "http://localhost:3000/api/prods/" + this.$route.params.username ||
+            "/api/prods/" + this.$route.params.username
+        )
+        .then(res => {
+          const prods = res.data;
+
+          const filteredProds = prods.filter(data =>
+            data.title.toLowerCase().includes(searchValue)
+          );
+
+          if (filteredProds.length === 0) {
+            (this.noResult = true),
+              document.querySelector(".player").classList.remove("playing");
+          } else {
+            this.noResult = false;
+          }
+
+          this.prods = filteredProds;
         })
         .catch(error => {
           console.log(error);
@@ -237,7 +316,7 @@ export default {
       )
       .then(res => {
         const prods = res.data;
-        prods.length === 0 ? (this.noResults = true) : (this.noResults = false);
+        prods.length === 0 ? (this.noProd = true) : (this.noProd = false);
         this.prods = prods;
       })
       .catch(error => console.log(error));
@@ -252,6 +331,7 @@ export default {
     url("../assets/img/profile-background.jpg") center center fixed;
   background-size: cover;
   padding: 3rem 6rem;
+  min-height: 100vh;
 
   @media (max-width: 768px) {
     padding: 3rem 2rem;
@@ -291,7 +371,7 @@ export default {
   }
 
   &__description {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
   &__social-links {
@@ -323,9 +403,112 @@ export default {
     margin-right: 0;
   }
 
+  &__my-infos {
+    margin-top: 3rem;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: letter-spacing 0.2s ease-in-out;
+      border: 1px solid $color-white;
+      padding: 1.5rem 2rem;
+      font-size: 1.3rem;
+      display: block;
+
+      &:hover {
+        letter-spacing: 2px;
+      }
+    }
+  }
+
+  .btn--manage-prods {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $color-white;
+    padding: 1.5rem 2rem;
+    text-decoration: none;
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    letter-spacing: 1px;
+    transition: letter-spacing 0.2s ease-in-out;
+    text-transform: uppercase;
+
+    &:hover {
+      letter-spacing: 2px;
+    }
+  }
+
+  .utils-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    @media (max-width: 1024px) {
+      display: block;
+    }
+  }
+
+  .searchbar {
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    width: 500px;
+    background: #262626;
+    padding: 0 1rem;
+    margin-right: 2rem;
+
+    @media (max-width: 1150px) {
+      width: 300px;
+    }
+
+    @media (max-width: 1024px) {
+      width: 100%;
+    }
+
+    input[type="text"] {
+      border: none;
+      outline: none;
+      font-size: 1.5rem;
+      margin: 0 0.5rem;
+      letter-spacing: 0.5px;
+      width: 100%;
+      background: #262626;
+      color: #f4f4f4;
+      padding: 1.3rem 0;
+      height: 45px;
+
+      &::placeholder {
+        color: #d4d3d3;
+        font-family: "Roboto", sans-serif;
+        font-size: 1.5rem;
+
+        @media (max-width: 480px) {
+          font-size: 1.4rem;
+        }
+      }
+    }
+
+    .btn--search {
+      display: flex;
+      background: none;
+      border: none;
+      outline: none;
+      padding: 1rem;
+      cursor: pointer;
+
+      .icon-search {
+        height: 1.6rem;
+        width: 1.6rem;
+        fill: #ccc;
+      }
+    }
+  }
+
   .sort-by {
     position: relative;
-    margin-top: 10rem;
 
     .btn--sort-by {
       height: 45px;
@@ -345,6 +528,11 @@ export default {
 
       * {
         pointer-events: none;
+      }
+
+      @media (max-width: 1024px) {
+        margin-top: 2rem;
+        width: 100%;
       }
 
       .icon-chevron-down {
@@ -386,10 +574,49 @@ export default {
     display: flex;
     flex-wrap: wrap;
 
-    .no-results {
-      margin-top: 10rem;
+    .no-result {
+      margin: 10rem 0;
       width: 100%;
       text-align: center;
+    }
+
+    .no-prod {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin: 10rem 0;
+
+      &__message {
+        margin-bottom: 3rem;
+        text-align: center;
+      }
+
+      .btn--add-prod {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid $color-white;
+        padding: 1.5rem 2rem;
+        text-decoration: none;
+        font-size: 1.3rem;
+
+        letter-spacing: 1px;
+        transition: letter-spacing 0.2s ease-in-out;
+        text-transform: uppercase;
+
+        &:hover {
+          letter-spacing: 2px;
+        }
+
+        .icon-plus {
+          height: 20px;
+          width: 20px;
+          fill: $color-white;
+          margin-right: 0.5rem;
+          margin-left: -5px;
+        }
+      }
     }
 
     .card {
@@ -401,6 +628,7 @@ export default {
         border-radius: 2px;
         transition: 0.1s ease-in-out;
         position: relative;
+        height: 250px;
 
         &:hover {
           .btn--play {
@@ -421,6 +649,8 @@ export default {
 
         img {
           width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .btn--play {

@@ -1,7 +1,8 @@
+const path = require("path");
+const fs = require('fs')
 const express = require("express");
 const Prods = require("../models/prods");
 const multer = require("multer");
-const path = require("path");
 
 
 const router = express.Router();
@@ -36,6 +37,11 @@ router.get("/api/prods/:username", async (req, res) => {
         console.log(error);
     }
 });
+
+router.get("/api/prods/images/:filename", (req, res) => {
+    res.sendFile(path.resolve('uploads/prods/covers/' + req.params.filename));
+});
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -101,4 +107,26 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
         console.log(error);
     }
 });
+
+    router.delete("/api/prods/:id", async (req, res) => {
+        const prodToDelete = await Prods.findById(req.params.id);
+        await Prods.deleteOne(prodToDelete);
+        
+        fs.unlink("uploads/prods/covers/" + prodToDelete.cover, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+        });
+
+        fs.unlink("uploads/prods/songs/" + prodToDelete.song, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+        });
+          
+        res.status(200).json({ message: "La prod a bien été supprimée" })
+    });
+
 module.exports = router;

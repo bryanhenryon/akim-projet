@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require('mongoose-unique-validator');
 const bcrypt = require("bcrypt");
 
 const usersSchema = new mongoose.Schema({
@@ -7,13 +8,15 @@ const usersSchema = new mongoose.Schema({
     required: true,
     trim: true,
     maxLength: 20,
-    unique: true
+    unique: true,
+    uniqueCaseInsensitive: true
   },
   email: {
     type: String,
     required: true,
     trim: true,
     unique: true,
+    uniqueCaseInsensitive: true,
     validate(value) {
       const regex = new RegExp(
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -62,9 +65,10 @@ const usersSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
     default: "profile-picture-placeholder.png"
-    
   }
 }, { timestamps: true });
+
+usersSchema.plugin(uniqueValidator);
 
 usersSchema.statics.findByCredentials = async (username, password) => {
   const user = await Users.findOne({ 

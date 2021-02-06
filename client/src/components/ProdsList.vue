@@ -116,7 +116,10 @@
       <div class="card" v-for="(prod, index) of prods" :key="index">
         <div class="image">
           <img
-            :src="'img/' + prod.cover"
+            :src="
+              'http://localhost:3000/api/prods/images/' + prod.cover ||
+                '/api/prods/images/' + prod.cover
+            "
             draggable="false"
             alt="Couverture du morceau"
           />
@@ -691,6 +694,7 @@ export default {
       border-radius: 2px;
       transition: 0.1s ease-in-out;
       position: relative;
+      height: 250px;
 
       &:hover {
         .btn--play {
@@ -711,6 +715,8 @@ export default {
 
       img {
         width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .btn--play {

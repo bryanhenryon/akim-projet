@@ -7,7 +7,14 @@
     <div class="cards">
       <div class="card" v-for="(prod, index) of latestProds" :key="index">
         <div class="image">
-          <img :src="'img/' + prod.cover" draggable="false" alt="" />
+          <img
+            :src="
+              'http://localhost:3000/api/prods/images/' + prod.cover ||
+                '/api/prods/images/' + prod.cover
+            "
+            draggable="false"
+            alt=""
+          />
           <button class="btn btn--play" @click="play">
             <svg class="icon icon-controller-play">
               <use xlink:href="sprite.svg#icon-controller-play"></use>
@@ -175,6 +182,7 @@ export default {
         border-radius: 2px;
         transition: 0.1s ease-in-out;
         position: relative;
+        height: 250px;
 
         &:hover {
           .btn--play {
@@ -195,6 +203,8 @@ export default {
 
         img {
           width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .btn--play {

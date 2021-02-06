@@ -175,7 +175,15 @@ export default {
             signUpModal.classList.remove("active");
           })
           .catch(error => {
-            console.log(error);
+            this.$store.commit(
+              "signUpModal/setEmailErrorMessage",
+              error.response.data.errors.email
+            );
+
+            this.$store.commit(
+              "signUpModal/setUsernameErrorMessage",
+              error.response.data.errors.username
+            );
           });
       }
     },

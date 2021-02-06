@@ -11,10 +11,36 @@ const createToken = (user) => {
     });
 }
 
+const handleErrors = (err) => {
+    let errors = { 
+        username: '',
+        email: ''
+     }
+
+    if(err.message.includes("Users validation failed")) {
+        Object.values(err.errors).forEach(({ properties }) => {
+                switch(properties.path) {
+                    case "username":
+                        errors.username = "Ce pseudo est déjà utilisé"
+                    break;
+                    case "email":
+                        errors.email = "Cette adresse email est déjà utilisée"
+                    break;
+                }
+        });
+    }
+
+    return errors;
+}
+
 router.get("/api/users", async (req, res) => {
-    const users = await Users.find({});
+    try {
+        const users = await Users.find({});
     const stringified = JSON.stringify(users, null, 2);
     res.type('json').send(stringified);
+    } catch(error) {
+        console.log(error);
+    }
 });
 
 router.get("/api/users/:username", async (req, res) => {
@@ -35,8 +61,9 @@ router.post("/api/users", async (req, res) => {
             },
             token
         });
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({errors});
     }
 });
 
@@ -52,7 +79,7 @@ router.post("/api/users/login", async (req, res) => {
             token
         });
     } catch (error) {
-        res.status(400).json({error: "Les identifiants sont incorrects, veuillez vérifier vos informations (attention aux majuscules)"});
+        res.status(400).json({error: "Les identifiants sont incorrects, veuillez vérifier vos informations"});
     }
 });
 

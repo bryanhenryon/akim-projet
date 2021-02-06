@@ -31,7 +31,7 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: "/compte/prods/ajout",
+    path: "/compte/prods/ajouter",
     name: "AddProd",
     component: AddProd,
     meta: { requiresAuth: true }
