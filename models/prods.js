@@ -5,7 +5,7 @@ const prodsSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    maxlength: 30,
+    maxlength: [30, "Le titre doit être de 30 caractères maximum"],
   },
   song: {
     type: String,

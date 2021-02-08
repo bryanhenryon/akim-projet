@@ -120,7 +120,11 @@
               <span class="format">{{ prod.format.toUpperCase() }}</span>
             </td>
 
-            <td v-if="prod.tags === []" data-label="Tags">{{ prod.tags }}</td>
+            <td v-if="prod.tags.length !== 0" data-label="Tags">
+              <span v-for="(tag, index) of prod.tags" :key="index">{{
+                tag
+              }}</span>
+            </td>
             <td v-else data-label="Tags">Aucun</td>
 
             <td data-label="Prix">{{ prod.price }}€</td>

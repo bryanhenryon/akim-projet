@@ -4,8 +4,34 @@ const express = require("express");
 const Prods = require("../models/prods");
 const multer = require("multer");
 
-
 const router = express.Router();
+
+const handleErrors = (err) => {
+    let errors = { 
+        title: '',
+        song: '',
+        price: '',
+     }
+
+    if(err.message.includes("Prods validation failed")) {
+        Object.values(err.errors).forEach(({ properties }) => {
+        switch(properties.path) {
+            case "title":
+                errors.title = "Veuillez indiquer un titre"
+            break;
+            case "song":
+                errors.song = "Veuillez indiquer un fichier audio"
+            break;
+            case "price":
+                errors.price = "Veuillez indiquer un prix"
+            break;
+        }
+        });
+    }
+
+    return errors;
+}
+
 
 router.get("/api/prods", async (req, res) => {
     try {
@@ -62,7 +88,7 @@ const storage = multer.diskStorage({
     fileFilter(req, file, cb) {
         if(file.fieldname === "cover") {
             if(!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-                return cb(new Error("Veuillez indiquer un fichier au format .png, .jpg ou .jpeg"))
+                return cb(new Error("Veuillez indiquer un fichier au format .png, .jpg ou .jpeg"));
             }
     
             cb(undefined, true);
@@ -76,16 +102,17 @@ const storage = multer.diskStorage({
             cb(undefined, true);
         }
     },
+    limits: { fileSize: 1024 * 1024 * 50 },
       storage
      });
 
 router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'song', maxCount: 1 }]), async (req, res) => {
     try {
         if(req.files.cover && req.files.cover[0].fieldname === "cover") {
-            if(req.files.cover[0].size > 1024 * 1024 * 5) {
-                res.status(400).json({error: "Le fichier est trop volumineux, 5 Mo maximum autorisés"});
-                return;
-            }
+            // if(req.files.cover[0].size > 1024 * 1024 * 5) {
+            //     res.status(400).send();
+            //     return;
+            // }
             req.body.cover = req.files.cover[0].filename;
         }
 
@@ -93,18 +120,20 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
             const extname = path.extname(req.files.song[0].filename).replace(".", ""); // Récupère l'extension du fichier sans le "." 
             req.body.format = extname;
 
-            if(req.files.song[0].size > 1024 * 1024 * 50) {
-                res.status(400).json({error: "Le fichier est trop volumineux, 50 Mo maximum autorisés"});
-                return;
-             }
+            // if(req.files.song[0].size > 1024 * 1024 * 50) {
+            //     errors.song = "Le fichier est trop volumineux, 50 Mo maximum autorisés";
+            //     res.status(400).json({errors});
+            //     return;
+            //  }
             req.body.song = req.files.song[0].filename;
         }
 
         const prod = new Prods(req.body);
         await prod.save();
-        res.send("Ca a marché");
+        res.status(200).send();
     } catch(error) {
-        console.log(error);
+        const errors = handleErrors(error);
+        res.status(400).json({errors});
     }
 });
 
@@ -112,12 +141,14 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
         const prodToDelete = await Prods.findById(req.params.id);
         await Prods.deleteOne(prodToDelete);
         
-        fs.unlink("uploads/prods/covers/" + prodToDelete.cover, (err) => {
-            if (err) {
-              console.error(err)
-              return
-            }
-        });
+        if(prodToDelete.cover !== "placeholder.jpg") {
+            fs.unlink("uploads/prods/covers/" + prodToDelete.cover, (err) => {
+                if (err) {
+                  console.error(err)
+                  return
+                }
+            });
+        }
 
         fs.unlink("uploads/prods/songs/" + prodToDelete.song, (err) => {
             if (err) {
