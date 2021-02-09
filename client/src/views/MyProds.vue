@@ -129,16 +129,19 @@
 
             <td data-label="Prix">{{ prod.price }}€</td>
             <td v-if="prod.maxStreams" data-label="Streams max">
-              {{ prod.maxStreams }}
+              {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
             </td>
             <td v-else data-label="Streams max">Illimité</td>
             <td data-action="Action">
-              <button class="btn btn--edit">
+              <router-link
+                :to="'/compte/prods/' + prod._id"
+                class="btn btn--edit"
+              >
                 Modifier
                 <svg class="icon icon-edit">
                   <use xlink:href="sprite.svg#icon-edit"></use>
                 </svg>
-              </button>
+              </router-link>
             </td>
             <td>
               <button class="btn btn--delete" @click="showConfirmModal(prod)">
@@ -185,7 +188,7 @@ export default {
         .then(res => {
           const prods = res.data;
           const filteredProds = prods.filter(
-            prod => prod.artist === this.user.username.toLowerCase()
+            prod => prod.artist === this.user.username
           );
           this.prods = filteredProds;
           this.prods.length === 0
@@ -684,6 +687,8 @@ export default {
 
     .btn--edit {
       background: #f0ad4e;
+      display: inline-flex;
+      text-decoration: none;
 
       .icon-edit {
         height: 15px;

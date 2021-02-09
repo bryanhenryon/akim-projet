@@ -12,6 +12,10 @@ const prodsSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  songToDisplay: {
+    type: String,
+    trim: true
+  },
   format: {
     type: String,
   },
@@ -24,6 +28,10 @@ const prodsSchema = new mongoose.Schema({
     type: String,
     trim: true,
     default: "placeholder.jpg"
+  },
+  coverToDisplay: {
+    type: String,
+    trim: true
   },
   tags: {
     type: [String]

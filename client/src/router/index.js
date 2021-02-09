@@ -4,6 +4,7 @@ import Prods from "../views/Prods";
 import Profile from "../views/Profile";
 import MyProds from "../views/MyProds";
 import AddProd from "../views/AddProd";
+import UpdateProd from "../views/UpdateProd";
 import ProfileInfos from "../views/ProfileInfos";
 import NewPassword from "../views/NewPassword";
 import store from "../store";
@@ -34,6 +35,12 @@ const routes = [
     path: "/compte/prods/ajouter",
     name: "AddProd",
     component: AddProd,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/compte/prods/:id",
+    name: "UpdateProd",
+    component: UpdateProd,
     meta: { requiresAuth: true }
   },
   {

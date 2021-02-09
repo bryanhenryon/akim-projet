@@ -14,7 +14,9 @@
             spellcheck="false"
             v-model="prod.title"
           />
-          <div class="title-error" v-if="prod.titleError">{{ prod.titleError }}</div>
+          <div class="title-error" v-if="prod.titleError">
+            {{ prod.titleError }}
+          </div>
         </div>
         <div class="form-group">
           <label for="cover-file"
@@ -34,7 +36,9 @@
             Choisir un fichier
           </button>
           <span class="cover-file-custom-txt">Aucun fichier selectionné</span>
-            <div class="cover-file-error" v-if="prod.coverFileError">{{ prod.coverFileError }}</div>
+          <div class="cover-file-error" v-if="prod.coverFileError">
+            {{ prod.coverFileError }}
+          </div>
         </div>
         <div class="form-group">
           <label for="audio-file"
@@ -54,7 +58,9 @@
             Choisir un fichier
           </button>
           <span class="audio-file-custom-txt">Aucun fichier selectionné</span>
-          <div class="audio-file-error" v-if="prod.audioFileError">{{ prod.audioFileError }}</div>
+          <div class="audio-file-error" v-if="prod.audioFileError">
+            {{ prod.audioFileError }}
+          </div>
         </div>
         <div class="form-group">
           <label for="tags"
@@ -81,7 +87,9 @@
             v-model="prod.price"
             placeholder="Ex: 19,99"
           />
-          <div v-if="prod.priceError" class="price-error">{{ prod.priceError }}</div>
+          <div v-if="prod.priceError" class="price-error">
+            {{ prod.priceError }}
+          </div>
         </div>
         <div class="form-group">
           <label for="max-streams"
@@ -146,6 +154,12 @@ export default {
       const bodyFormData = new FormData();
       bodyFormData.append("title", this.prod.title);
       bodyFormData.append("song", this.prod.song);
+      if (this.prod.song) {
+        const realAudioFileBtn = document.getElementById("audio-file");
+        const audioFileName = realAudioFileBtn.files[0].name;
+
+        bodyFormData.append("songToDisplay", audioFileName);
+      }
       bodyFormData.append("tags", this.prod.tags);
       bodyFormData.append("artist", this.user.username);
 
@@ -153,24 +167,21 @@ export default {
         -> Si la valeur est décimale, retourne une valeur à deux chiffres. Ex: 20,96 au lieu de 20,96468464684654684 
         -> this.prod.price % 1 retournera toujours 0 si la valeur est un entier, 0.5 si c'est une décimale
       */
-      if(this.prod.price % 1 !== 0) {
+      if (this.prod.price % 1 !== 0) {
         bodyFormData.append("price", Number(this.prod.price).toFixed(2));
       } else {
         bodyFormData.append("price", this.prod.price);
       }
 
-      /*
-        -> Retourne la valeur avec un espace avant une suite de 3 chiffres. Ex: 20 000 au lieu de 20000
-      */
-      bodyFormData.append(
-        "maxStreams",
-        this.prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-      );
+      bodyFormData.append("maxStreams", this.prod.maxStreams);
 
       if (!this.prod.cover) {
         bodyFormData.append("cover", "placeholder.jpg");
       } else {
+        const realCoverFileBtn = document.getElementById("cover-file");
+        const coverFileName = realCoverFileBtn.files[0].name;
         bodyFormData.append("cover", this.prod.cover);
+        bodyFormData.append("coverToDisplay", coverFileName);
       }
 
       axios({
@@ -180,14 +191,13 @@ export default {
         headers: { "Content-Type": "multipart/form-data" }
       })
         .then(() => {
-          this.$router.push("/compte/prods")
+          this.$router.push("/compte/prods");
         })
-        .catch((error) => {
-           this.prod.coverFileError = error.response.data.errors.cover;
-           this.prod.audioFileError = error.response.data.errors.song;
-           this.prod.titleError = error.response.data.errors.title;
-           this.prod.priceError = error.response.data.errors.price;
-
+        .catch(error => {
+          this.prod.coverFileError = error.response.data.errors.cover;
+          this.prod.audioFileError = error.response.data.errors.song;
+          this.prod.titleError = error.response.data.errors.title;
+          this.prod.priceError = error.response.data.errors.price;
         });
     },
     triggerAudioFileBtn() {
@@ -284,7 +294,7 @@ export default {
   .cover-file-error,
   .audio-file-error,
   .price-error {
-    margin-top:1rem;
+    margin-top: 1rem;
     color: #ff5367;
     font-size: 1.4rem;
   }

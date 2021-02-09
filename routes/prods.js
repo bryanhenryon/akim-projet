@@ -50,6 +50,15 @@ router.get("/api/prods", async (req, res) => {
         console.log(error);
     }
 });
+router.get("/api/prod/:id", async (req, res) => {
+    try {
+        const prod = await Prods.findOne({_id: req.params.id});
+        const stringified = JSON.stringify(prod, null, 2);
+        res.type('json').send(stringified);
+    } catch (error) {
+        console.log(error);
+    }
+});
 
 router.get("/api/prods/:username", async (req, res) => {
     try {
@@ -63,6 +72,7 @@ router.get("/api/prods/:username", async (req, res) => {
         console.log(error);
     }
 });
+
 
 router.get("/api/prods/images/:filename", (req, res) => {
     res.sendFile(path.resolve('uploads/prods/covers/' + req.params.filename));
@@ -130,10 +140,60 @@ router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name:
 
         const prod = new Prods(req.body);
         await prod.save();
-        res.status(200).send();
+        res.status(200).json(prod);
     } catch(error) {
         const errors = handleErrors(error);
         res.status(400).json({errors});
+    }
+});
+
+
+router.patch("/api/prods/:id", upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'song', maxCount: 1 }]), async (req, res) => {
+    try {
+        if(req.files.cover && req.files.cover[0].fieldname === "cover") {
+            req.body.cover = req.files.cover[0].filename;
+        }
+
+        if(req.files.song && req.files.song[0].fieldname === "song") {
+            const extname = path.extname(req.files.song[0].filename).replace(".", ""); // Récupère l'extension du fichier sans le "." 
+            req.body.format = extname;
+
+            req.body.song = req.files.song[0].filename;
+        }
+
+        const prod = await Prods.findById(req.params.id);
+
+        if(!prod) {
+            return res.status(404).send("La prod n'existe pas");
+        }
+
+        if(req.files.cover) {
+            if(prod.cover !== "placeholder.jpg") {
+                fs.unlink("uploads/prods/covers/" + prod.cover, (err) => {
+                    if (err) {
+                      console.error(err)
+                      return
+                    }
+                });
+            }
+        }
+
+           if(req.files.song) {
+            fs.unlink("uploads/prods/songs/" + prod.song, (err) => {
+                if (err) {
+                  console.error(err)
+                  return
+                }
+            });
+        
+           }
+
+        const prodToUpdate = await Prods.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, useFindAndModify: false});
+
+        res.send(prodToUpdate);
+    } catch (error) {
+        res.status(400).send(error);
+        console.log(error);
     }
 });
 
