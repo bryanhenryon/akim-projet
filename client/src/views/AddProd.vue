@@ -189,7 +189,6 @@ export default {
           this.$router.push("/compte/prods");
         })
         .catch(error => {
-          this.prod.coverFileError = error.response.data.errors.cover;
           this.prod.audioFileError = error.response.data.errors.song;
           this.prod.titleError = error.response.data.errors.title;
           this.prod.priceError = error.response.data.errors.price;
