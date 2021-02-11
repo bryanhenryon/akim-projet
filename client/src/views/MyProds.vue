@@ -94,7 +94,7 @@
       <div v-if="noResult" class="no-result">
         Aucun résultat trouvé
       </div>
-      <table class="table" v-for="(prod, index) of prods" :key="index">
+      <table v-else class="table" v-for="(prod, index) of prods" :key="index">
         <thead>
           <th>Couverture</th>
           <th>Titre</th>
@@ -110,7 +110,7 @@
               <img
                 :src="
                   'http://localhost:3000/api/prods/images/' + prod.cover ||
-                    '/uploads/api/prods/images/' + prod.cover
+                    '/api/prods/images/' + prod.cover
                 "
                 alt="Couverture de la prod"
               />
@@ -202,9 +202,10 @@ export default {
       axios
         .delete(
           "http://localhost:3000/api/prods/" + prodToDelete._id ||
-            "/api/prods/" + prodToDelete._id, {
-              headers: { "Authorization": this.jwt }
-            }
+            "/api/prods/" + prodToDelete._id,
+          {
+            headers: { Authorization: this.jwt }
+          }
         )
         .then(() => {
           this.hideConfirmModal();
@@ -233,12 +234,7 @@ export default {
             data.title.toLowerCase().includes(searchValue)
           );
 
-          if (filteredProds.length === 0) {
-            (this.noResult = true),
-              document.querySelector(".player").classList.remove("playing");
-          } else {
-            this.noResult = false;
-          }
+          filteredProds.length === 0 ? this.noResult = true :this.noResult = false
 
           this.prods = filteredProds;
         })

@@ -163,15 +163,7 @@ export default {
       bodyFormData.append("tags", this.prod.tags);
       bodyFormData.append("artist", this.user.username);
 
-      /* 
-        -> Si la valeur est décimale, retourne une valeur à deux chiffres. Ex: 20,96 au lieu de 20,96468464684654684 
-        -> this.prod.price % 1 retournera toujours 0 si la valeur est un entier, 0.5 si c'est une décimale
-      */
-      if (this.prod.price % 1 !== 0) {
-        bodyFormData.append("price", Number(this.prod.price).toFixed(2));
-      } else {
-        bodyFormData.append("price", this.prod.price);
-      }
+      bodyFormData.append("price", Number(this.prod.price).toFixed(2));
 
       bodyFormData.append("maxStreams", this.prod.maxStreams);
 
@@ -188,10 +180,10 @@ export default {
         method: "post",
         url: "http://localhost:3000/api/prods" || "/api/prods",
         data: bodyFormData,
-        headers: { 
+        headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": this.jwt,
-           }
+          Authorization: this.jwt
+        }
       })
         .then(() => {
           this.$router.push("/compte/prods");
@@ -338,7 +330,7 @@ export default {
 
 .btn--cancel {
   border: 1px solid $color-white;
-  margin-right: 4rem;
+  margin-right: 1rem;
 }
 
 .btn--add-prod {

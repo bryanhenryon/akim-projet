@@ -6,7 +6,7 @@ import MyProds from "../views/MyProds";
 import AddProd from "../views/AddProd";
 import UpdateProd from "../views/UpdateProd";
 import ProfileInfos from "../views/ProfileInfos";
-import NewPassword from "../views/NewPassword";
+// import NewPassword from "../components/ProfileInfos/Password";
 import store from "../store";
 
 const routes = [
@@ -48,13 +48,13 @@ const routes = [
     name: "ProfileInfos",
     component: ProfileInfos,
     meta: { requiresAuth: true }
-  },
-  {
-    path: "/compte/nouveau-mot-de-passe",
-    name: "NewPassword",
-    component: NewPassword,
-    meta: { requiresAuth: true }
   }
+  // {
+  //   path: "/compte/nouveau-mot-de-passe",
+  //   name: "NewPassword",
+  //   component: NewPassword,
+  //   meta: { requiresAuth: true }
+  // }
 ];
 
 routes.scrollBehavior = () => {

@@ -155,7 +155,7 @@ export default {
       bodyFormData.append("title", this.prod.title);
       bodyFormData.append("song", this.prod.song);
 
-        const realAudioFileBtn = document.getElementById("audio-file");
+      const realAudioFileBtn = document.getElementById("audio-file");
       if (realAudioFileBtn.files[0]) {
         const audioFileName = realAudioFileBtn.files[0].name;
         bodyFormData.append("songToDisplay", audioFileName);
@@ -163,22 +163,14 @@ export default {
       bodyFormData.append("tags", this.prod.tags);
       bodyFormData.append("artist", this.user.username);
 
-      /* 
-        -> Si la valeur est décimale, retourne une valeur à deux chiffres. Ex: 20,96 au lieu de 20,96468464684654684 
-        -> this.prod.price % 1 retournera toujours 0 si la valeur est un entier, 0.5 si c'est une décimale
-      */
-      if (this.prod.price % 1 !== 0) {
-        bodyFormData.append("price", Number(this.prod.price).toFixed(2));
-      } else {
-        bodyFormData.append("price", this.prod.price);
-      }
+      bodyFormData.append("price", Number(this.prod.price).toFixed(2));
 
       bodyFormData.append("maxStreams", this.prod.maxStreams);
 
-        const realCoverFileBtn = document.getElementById("cover-file");
+      const realCoverFileBtn = document.getElementById("cover-file");
       if (!this.prod.cover) {
         bodyFormData.append("cover", "placeholder.jpg");
-      } else if(realCoverFileBtn.files[0]){
+      } else if (realCoverFileBtn.files[0]) {
         const coverFileName = realCoverFileBtn.files[0].name;
         bodyFormData.append("cover", this.prod.cover);
         bodyFormData.append("coverToDisplay", coverFileName);
@@ -190,10 +182,10 @@ export default {
           "http://localhost:3000/api/prods/" + this.$route.params.id ||
           "/api/prods/" + this.$route.params.id,
         data: bodyFormData,
-        headers: { 
+        headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": this.jwt,
-          }
+          Authorization: this.jwt
+        }
       })
         .then(() => {
           this.$router.push("/compte/prods");
@@ -230,33 +222,37 @@ export default {
     }
   },
   created() {
-      axios
+    axios
       .get(
         "http://localhost:3000/api/prod/" + this.$route.params.id ||
           "/api/prod/" + this.$route.params.id
       )
       .then(res => {
-        if(res.data.artist === this.user.username) {
-        this.prod.title = res.data.title;
-        this.prod.song = res.data.song;
-        this.prod.cover = res.data.cover;
-        this.prod.tags = res.data.tags;
-        this.prod.price = res.data.price;
-        this.prod.maxStreams = res.data.maxStreams;
+        if (res.data.artist === this.user.username) {
+          this.prod.title = res.data.title;
+          this.prod.song = res.data.song;
+          this.prod.cover = res.data.cover;
+          this.prod.tags = res.data.tags;
+          this.prod.price = res.data.price;
+          this.prod.maxStreams = res.data.maxStreams;
 
-        const customAudioTxt = document.querySelector(".audio-file-custom-txt");
-        const customCoverTxt = document.querySelector(".cover-file-custom-txt");
+          const customAudioTxt = document.querySelector(
+            ".audio-file-custom-txt"
+          );
+          const customCoverTxt = document.querySelector(
+            ".cover-file-custom-txt"
+          );
 
-        if (res.data.coverToDisplay) {
-          customCoverTxt.innerHTML = res.data.coverToDisplay;
-        }
-        customAudioTxt.innerHTML = res.data.songToDisplay;
+          if (res.data.coverToDisplay) {
+            customCoverTxt.innerHTML = res.data.coverToDisplay;
+          }
+          customAudioTxt.innerHTML = res.data.songToDisplay;
         } else {
           this.$router.push("/compte/prods");
         }
       })
       .catch(e => console.log(e));
-    }
+  }
 };
 </script>
 
@@ -365,7 +361,7 @@ export default {
 
 .btn--cancel {
   border: 1px solid $color-white;
-  margin-right: 4rem;
+  margin-right: 1rem;
 }
 
 .btn--add-prod {

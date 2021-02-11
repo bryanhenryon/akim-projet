@@ -24,11 +24,20 @@
             </svg>
           </button>
           <audio class="audio">
-            <source :src="
-            'http://localhost:3000/api/prods/song/' + prod.song ||
-            '/api/prods/song/' + prod.song" type="audio/mpeg" />
-            <source :src="'http://localhost:3000/api/prods/song/' + prod.song ||
-            '/api/prods/song/' + prod.song" type="audio/wav" />
+            <source
+              :src="
+                'http://localhost:3000/api/prods/song/' + prod.song ||
+                  '/api/prods/song/' + prod.song
+              "
+              type="audio/mpeg"
+            />
+            <source
+              :src="
+                'http://localhost:3000/api/prods/song/' + prod.song ||
+                  '/api/prods/song/' + prod.song
+              "
+              type="audio/wav"
+            />
           </audio>
         </div>
         <div class="bottom">
@@ -41,7 +50,11 @@
                 >{{ prod.artist }}</router-link
               >
             </div>
-            <div class="max-streams">Streams max: 100k</div>
+            <div v-if="prod.maxStreams" class="max-streams">
+              Max streams:
+              {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
+            </div>
+            <div v-else class="max-streams">Max streams: illimité</div>
             <span class="format">{{ prod.format.toUpperCase() }}</span>
           </div>
           <button class="btn btn--buy">
@@ -56,17 +69,22 @@
     <router-link to="/prods" class="btn btn--see-all--secondary"
       >Tout voir</router-link
     >
+    <app-player></app-player>
   </section>
 </template>
 
 <script>
 import axios from "axios";
+import Player from "../components/Player";
 
 export default {
   data() {
     return {
       latestProds: null
     };
+  },
+  components: {
+    "app-player": Player
   },
   methods: {
     play(e) {
@@ -180,6 +198,7 @@ export default {
       border-radius: 3px;
       width: 250px;
       margin: 4rem 2rem;
+      word-break:break-word;
 
       .image {
         border-radius: 2px;

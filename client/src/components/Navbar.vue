@@ -24,7 +24,7 @@
           <div class="navbar__user-img-container">
             <img
               class="navbar__user-img"
-              :src="`img/${user.profilePicture}`"
+              :src="'http://localhost:3000/api/user/profile_picture/' + user.profilePicture || '/api/user/profile_picture/' + user.profilePicture"
               alt="Image de profil"
             />
           </div>
@@ -282,6 +282,7 @@ export default {
     width: 4rem;
     height: 4rem;
     margin-right: 1.5rem;
+    object-fit:cover;
   }
 
   .icon-chevron-down--profile-dropdown-btn {

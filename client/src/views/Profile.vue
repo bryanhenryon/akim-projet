@@ -4,7 +4,11 @@
     <div class="container">
       <img
         class="profile__image"
-        src="../assets/img/profile-picture-placeholder.png"
+        :src="
+          'http://localhost:3000/api/user/profile_picture/' +
+            user.profilePicture ||
+            '/api/user/profile_picture/' + user.profilePicture
+        "
         alt="Image de profil"
       />
       <div class="profile__username">{{ user.username }}</div>
@@ -147,8 +151,20 @@
             </svg>
           </button>
           <audio class="audio">
-            <source :src="'music/' + prod.song" type="audio/mpeg" />
-            <source :src="'music/' + prod.song" type="audio/wav" />
+            <source
+              :src="
+                'http://localhost:3000/api/prods/song/' + prod.song ||
+                  '/api/prods/song/' + prod.song
+              "
+              type="audio/mpeg"
+            />
+            <source
+              :src="
+                'http://localhost:3000/api/prods/song/' + prod.song ||
+                  '/api/prods/song/' + prod.song
+              "
+              type="audio/wav"
+            />
           </audio>
         </div>
         <div class="bottom">
@@ -163,7 +179,11 @@
                 >{{ prod.artist }}</router-link
               >
             </div>
-            <div class="max-streams">Streams max: 100k</div>
+            <div v-if="prod.maxStreams" class="max-streams">
+              Max streams:
+              {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
+            </div>
+            <div v-else class="max-streams">Max streams: illimité</div>
             <span class="format">{{ prod.format.toUpperCase() }}</span>
           </div>
           <button class="btn btn--buy" @click="buyProd">
@@ -175,6 +195,7 @@
         </div>
       </div>
     </div>
+    <app-player></app-player>
     <app-footer></app-footer>
   </div>
 </template>
@@ -183,11 +204,13 @@
 import { mapState } from "vuex";
 import axios from "axios";
 import Navbar from "../components/Navbar";
+import Player from "../components/Player";
 import Footer from "../components/Footer";
 
 export default {
   components: {
     "app-navbar": Navbar,
+    "app-player": Player,
     "app-footer": Footer
   },
   data() {
@@ -298,6 +321,39 @@ export default {
         .catch(error => {
           console.log(error);
         });
+    },
+    play(e) {
+      document.querySelector(".player").classList.add("playing");
+      document.querySelector(".btn--play2").classList.add("playing");
+
+      const audio = e.currentTarget.nextSibling;
+      const allBtn = document.querySelectorAll(".btn--play");
+      const isPlaying = e.currentTarget.classList.contains("active");
+
+      for (const btn of allBtn) {
+        if (btn.classList.contains("active")) {
+          btn.classList.remove("active");
+          btn.nextSibling.pause();
+        }
+
+        if (btn !== e.currentTarget) {
+          btn.nextSibling.currentTime = 0;
+        }
+      }
+
+      if (isPlaying) {
+        e.currentTarget.classList.remove("active");
+        document.querySelector(".btn--play2").classList.remove("playing");
+        audio.pause();
+      } else {
+        e.currentTarget.classList.add("active");
+        audio.play();
+        if (
+          document.querySelector(".btn--sound").classList.contains("active")
+        ) {
+          audio.muted = true;
+        }
+      }
     }
   },
   created() {
@@ -356,6 +412,7 @@ export default {
     width: 175px;
     border-radius: 50%;
     margin-bottom: 1rem;
+    object-fit: cover;
   }
 
   &__username {
@@ -623,6 +680,7 @@ export default {
       border-radius: 3px;
       width: 250px;
       margin: 4rem 3rem;
+      word-break:break-word;
 
       .image {
         border-radius: 2px;

@@ -65,7 +65,11 @@ const usersSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
     default: "profile-picture-placeholder.png"
-  }
+  },
+  profilePictureToDisplay: {
+    type: String,
+    trim: true
+  },
 }, { timestamps: true });
 
 usersSchema.plugin(uniqueValidator);
