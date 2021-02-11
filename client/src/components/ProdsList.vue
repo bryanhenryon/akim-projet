@@ -117,7 +117,6 @@
         <div class="image">
           <img
             :src="
-              'http://localhost:3000/api/prods/images/' + prod.cover ||
                 '/api/prods/images/' + prod.cover
             "
             draggable="false"
@@ -134,14 +133,12 @@
           <audio class="audio">
             <source
               :src="
-                'http://localhost:3000/api/prods/song/' + prod.song ||
                   '/api/prods/song/' + prod.song
               "
               type="audio/mpeg"
             />
             <source
               :src="
-                'http://localhost:3000/api/prods/song/' + prod.song ||
                   '/api/prods/song/' + prod.song
               "
               type="audio/wav"

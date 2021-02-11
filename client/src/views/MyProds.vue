@@ -14,7 +14,6 @@
           <img
             class="confirm-modal__prod-img"
             :src="
-              'http://localhost:3000/api/prods/images/' + prodToDelete.cover ||
                 'api/prods/images/' + prodToDelete.cover
             "
             alt="Couverture du morceau à supprimer"
@@ -109,7 +108,6 @@
             <td data-label="Couverture">
               <img
                 :src="
-                  'http://localhost:3000/api/prods/images/' + prod.cover ||
                     '/api/prods/images/' + prod.cover
                 "
                 alt="Couverture de la prod"
