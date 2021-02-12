@@ -5,14 +5,12 @@ const Users = require("../models/users");
 const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 const multer = require("multer");
+const bcrypt = require("bcrypt");
 
 const router = express.Router();
 
-const maxAge = 3 * 24 * 60 * 60; // 3 jours
 const createToken = (user) => {
-    return jwt.sign({ user }, process.env.JWT_SECRET, {
-        expiresIn: maxAge
-    });
+    return jwt.sign({ user }, process.env.JWT_SECRET);
 }
 
 const handleErrors = (err) => {
@@ -121,7 +119,6 @@ const storage = multer.diskStorage({
 
 router.patch("/api/users/me", auth, upload.single("profilePicture"), async (req, res) => {
     try {
-    
         const user = await Users.findOne({_id: req.user._id});
 
         if(!user) {
@@ -144,9 +141,37 @@ router.patch("/api/users/me", auth, upload.single("profilePicture"), async (req,
 
         res.send(userToUpdate);
     } catch (e) {
-        res.status(400);
-        console.log(e);
+        res.status(400).send(e);
     }
 });
+
+router.patch("/api/users/me/new-password", auth, async (req, res) => {
+    try {
+        const user = await Users.findOne({_id: req.user._id});
+
+        if(!user) {
+            return res.status(404).send();
+        }
+
+        const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
+
+        if(!isMatch) {
+            return res.status(400).json({
+                "password": "Le mot de passe est incorrect"
+            })
+        }
+
+       user.password = req.body.newPassword;
+
+        updatedUser = await new Users(user);
+
+        await updatedUser.save();
+
+        res.send(updatedUser);
+
+    } catch (err) {
+        res.status(400).send();
+    }
+})
 
 module.exports = router;

@@ -60,7 +60,7 @@ const usersSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minLength: 6
+    minLength: [6, "Le mot de passe doit être d'au moins 6 caractères"]
   },
   profilePicture: {
     type: String,

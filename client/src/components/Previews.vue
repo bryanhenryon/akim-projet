@@ -5,6 +5,9 @@
       <router-link to="/prods" class="btn btn--see-all">Tout voir</router-link>
     </div>
     <div class="cards">
+      <div class="no-results" v-if="noResults">
+        Aucun résultat trouvé
+      </div>
       <div class="card" v-for="(prod, index) of latestProds" :key="index">
         <div class="image">
           <img
@@ -72,7 +75,8 @@ import Player from "../components/Player";
 export default {
   data() {
     return {
-      latestProds: null
+      latestProds: null,
+      noResults: null
     };
   },
   computed: {
@@ -123,6 +127,7 @@ export default {
       .get(this.apiRoot + "prods")
       .then(res => {
         const data = res.data;
+        data.length === 0 ? (this.noResults = true) : (this.noResults = false);
         const sortedData = data.sort((a, b) =>
           b.createdAt > a.createdAt ? 1 : -1
         );
@@ -188,8 +193,13 @@ export default {
 
   .cards {
     display: flex;
-    justify-content: space-evenly;
     flex-wrap: wrap;
+
+    .no-results {
+      margin: 10rem 0;
+      width: 100%;
+      text-align: center;
+    }
 
     .card {
       border-radius: 3px;

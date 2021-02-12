@@ -31,7 +31,7 @@ export default {
   flex-direction: column;
   height: 100vh;
   background: linear-gradient(rgba(rgb(0, 0, 0), 0.2), rgba($color-black, 1)),
-    url("../../public/img/header-bg2.jpg");
+    url("../assets/img/header-background.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;
