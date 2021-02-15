@@ -199,18 +199,16 @@ export default {
         dropdownMenu.style.display = "block";
 
         window.addEventListener("click", e => {
-          e.target !== btnSortBy ? this.hideDropdownMenu() : false;
+          e.target !== btnSortBy
+            ? this.hideDropdownMenu(btnSortBy, dropdownMenu, iconChevronDown)
+            : false;
         });
       } else {
         iconChevronDown.style.transform = "rotate(0)";
         dropdownMenu.style.display = "none";
       }
     },
-    hideDropdownMenu() {
-      const btnSortBy = document.querySelector(".btn--sort-by");
-      const dropdownMenu = document.querySelector(".sort-by-content");
-      const iconChevronDown = document.querySelector(".icon-chevron-down");
-
+    hideDropdownMenu(btnSortBy, dropdownMenu, iconChevronDown) {
       btnSortBy.classList.remove("active");
       iconChevronDown.style.transform = "rotate(0)";
       dropdownMenu.style.display = "none";
