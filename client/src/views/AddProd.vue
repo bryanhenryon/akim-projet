@@ -102,6 +102,9 @@
             v-model="prod.price"
             placeholder="Ex: 19,99"
           />
+          <svg class="icon icon-euro">
+            <use xlink:href="sprite.svg#icon-euro"></use>
+          </svg>
           <div v-if="prod.priceError" class="price-error">
             {{ prod.priceError }}
           </div>
@@ -247,6 +250,9 @@ export default {
 
       const file = realFileBtn.files[0];
       this.prod.cover = file;
+    },
+    removeTag(index) {
+      this.prod.tags.splice(index, 1);
     }
   },
   mounted() {
@@ -319,6 +325,7 @@ export default {
 
 .form-group {
   margin: 5rem 0;
+  position: relative;
 
   label {
     display: block;
@@ -348,6 +355,15 @@ export default {
     &::placeholder {
       color: rgba($color-white, 0.7);
     }
+  }
+
+  .icon-euro {
+    fill: $color-white;
+    width: 1.3rem;
+    height: 1.3rem;
+    position: absolute;
+    top: 32px;
+    right: 0;
   }
 
   .title-error,
