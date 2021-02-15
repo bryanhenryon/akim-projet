@@ -22,6 +22,9 @@
         <span class="profile-pic-file-custom-txt"
           >Aucun fichier selectionné</span
         >
+        <div v-if="profilePictureError" class="profile-pic-file-error">
+          {{ profilePictureError }}
+        </div>
       </div>
       <div class="form-group">
         <input
@@ -29,13 +32,16 @@
           type="text"
           name="update-email"
           id="update-email"
-          autocomplete="nope"
+          autocomplete="false"
           spellcheck="false"
           placeholder="Email"
         />
         <svg class="icon icon-email">
           <use xlink:href="sprite.svg#icon-email"></use>
         </svg>
+        <div v-if="emailErrorMessage" class="update-email-error">
+          {{ emailErrorMessage }}
+        </div>
       </div>
       <div class="form-group">
         <label for="description">Description</label>
@@ -140,7 +146,9 @@ export default {
   data() {
     return {
       profilePicture: "",
+      profilePictureError: "",
       email: "",
+      emailErrorMessage: "",
       description: "",
       soundcloud: "",
       instagram: "",
@@ -161,6 +169,8 @@ export default {
   },
   methods: {
     submit() {
+      if (this.email === "")
+        return (this.emailErrorMessage = "Veuillez indiquer une adresse email");
       this.isLoading = true;
       const bodyFormData = new FormData();
       bodyFormData.append("profilePicture", this.profilePicture);
@@ -215,7 +225,15 @@ export default {
         })
         .catch(error => {
           this.isLoading = false;
-          console.log(error);
+          this.emailErrorMessage = error.response.data.email;
+
+          if (error.response.data.coverFileTypeError) {
+            this.profilePictureError = error.response.data.coverFileTypeError;
+          } else if (error.response.data.coverSizeError) {
+            this.profilePictureError = error.response.data.coverSizeError;
+          } else {
+            this.profilePictureError = "";
+          }
         });
     },
     triggerProfilePicFileBtn() {
@@ -315,6 +333,13 @@ export default {
     }
   }
 
+  .update-email-error,
+  .profile-pic-file-error {
+    margin-top: 1rem;
+    color: #ff5367;
+    font-size: 1.4rem;
+  }
+
   #description {
     font-family: inherit;
     background: none;
@@ -347,7 +372,6 @@ export default {
     width: 1.6rem;
     position: absolute;
     left: 1rem;
-    bottom: 0.7rem;
   }
 }
 

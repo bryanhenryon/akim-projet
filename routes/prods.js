@@ -7,33 +7,6 @@ const auth = require("../middlewares/auth");
 
 const router = express.Router();
 
-const handleErrors = (err) => {
-    let errors = { 
-        title: '',
-        song: '',
-        price: '',
-     }
-
-    if(err.message.includes("Prods validation failed")) {
-        Object.values(err.errors).forEach(({ properties }) => {
-        switch(properties.path) {
-            case "title":
-                errors.title = "Veuillez indiquer un titre"
-            break;
-            case "song":
-                errors.song = "Veuillez indiquer un fichier audio"
-            break;
-            case "price":
-                errors.price = "Veuillez indiquer un prix"
-            break;
-        }
-        });
-    }
-
-    return errors;
-}
-
-
 router.get("/api/prods", async (req, res) => {
     try {
         const query = req.query;
@@ -87,6 +60,7 @@ router.get("/api/prods/song/:filename", (req, res) => {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        console.log(file);
         if(file.fieldname === "cover") {
             return cb(null, path.resolve("uploads/prods/covers/"));
         } 
@@ -102,69 +76,99 @@ const storage = multer.diskStorage({
   
   const upload = multer({ 
     fileFilter(req, file, cb) {
-        if(file.fieldname === "cover") {
-            if(!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
-                return cb(new Error("Veuillez indiquer un fichier au format .png, .jpg ou .jpeg"));
-            }
-    
-            cb(undefined, true);
-        }
-
-        if(file.fieldname === "song") {
-            if(!file.originalname.match(/\.(mp3|wav)$/)) {
-                return cb(new Error("Veuillez indiquer un fichier au format .mp3 ou .wav"));
-            }
-    
-            cb(undefined, true);
+        if(file.fieldname === "cover" && !file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+            req.coverFileTypeError = "Veuillez indiquer un fichier au format .png, .jpg ou .jpeg";
+            cb(null, false);
+        } else if(file.fieldname === "song" && !file.originalname.match(/\.(mp3|wav)$/)){
+            req.prodFileTypeError = "Veuillez indiquer un fichier au format .mp3 ou .wav";
+            cb(null, false);
+        } else {
+            cb(null, true);
         }
     },
-    limits: { fileSize: 1024 * 1024 * 50 },
+        limits: {
+            fileSize: 1024 * 1024 * 50
+        },
       storage
-     });
+     }).fields([{ name: 'cover', maxCount: 1 }, { name: 'song', maxCount: 1 }]);
 
-router.post("/api/prods", upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'song', maxCount: 1 }]), async (req, res) => {
-    try {
-        if(req.files.cover && req.files.cover[0].fieldname === "cover") {
-            // if(req.files.cover[0].size > 1024 * 1024 * 5) {
-            //     res.status(400).send();
-            //     return;
-            // }
-            req.body.cover = req.files.cover[0].filename;
+router.post("/api/prods", (req, res) => {
+    upload(req, res, async err => {
+        try {
+            if (err) { 
+                if (err.code == 'LIMIT_FILE_SIZE' && err.field) {
+                    err.message = 'Le fichier est trop volumineux, 50 Mo maximum autorisés';
+                }
+                return res.status(400).json(err);
+            } else {
+            if(req.files.cover && req.files.cover[0].fieldname === "cover") {
+                if(req.files.cover[0].size > 1024 * 1024 * 10) {
+                    res.status(400).json({coverSizeError: "Le fichier est trop volumineux, 10 Mo maximum autorisés"});
+                    return;
+                }
+                req.body.cover = req.files.cover[0].filename;
+            }
+    
+            if(req.files.song && req.files.song[0].fieldname === "song") {
+                req.body.song = req.files.song[0].filename;   
+    
+                const extname = path.extname(req.files.song[0].filename).replace(".", ""); 
+                req.body.format = extname;
+            }
+    
+            if(req.coverFileTypeError) {
+                res.status(400).json({coverFileTypeError: req.coverFileTypeError});
+                return;
+            } 
+    
+            if(req.prodFileTypeError) {
+                res.status(400).json({prodFileTypeError: req.prodFileTypeError});
+                return;
+            }
+    
+            const prod = new Prods(req.body);
+            await prod.save();
+            res.status(200).json(prod);
         }
-
-        if(req.files.song && req.files.song[0].fieldname === "song") {
-            const extname = path.extname(req.files.song[0].filename).replace(".", ""); // Récupère l'extension du fichier sans le "." 
-            req.body.format = extname;
-
-            // if(req.files.song[0].size > 1024 * 1024 * 50) {
-            //     errors.song = "Le fichier est trop volumineux, 50 Mo maximum autorisés";
-            //     res.status(400).json({errors});
-            //     return;
-            //  }
-            req.body.song = req.files.song[0].filename;
+        } catch(error) {
+            res.status(400).json({error: error.message});
         }
-
-        const prod = new Prods(req.body);
-        await prod.save();
-        res.status(200).json(prod);
-    } catch(error) {
-        const errors = handleErrors(error);
-        res.status(400).json({errors});
-    }
+    });
 });
 
 
-router.patch("/api/prods/:id", auth, upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'song', maxCount: 1 }]), async (req, res) => {
+router.patch("/api/prods/:id", auth, (req, res) => {
+    upload(req, res, async err => {
     try {
+        if (err) { 
+            if (err.code == 'LIMIT_FILE_SIZE' && err.field) {
+                err.message = 'Le fichier est trop volumineux, 50 Mo maximum autorisés';
+            }
+            return res.status(400).json(err);
+        } else {
         if(req.files.cover && req.files.cover[0].fieldname === "cover") {
+            if(req.files.cover[0].size > 1024 * 1024 * 10) {
+                res.status(400).json({coverSizeError: "Le fichier est trop volumineux, 10 Mo maximum autorisés"});
+                return;
+            }
             req.body.cover = req.files.cover[0].filename;
         }
 
         if(req.files.song && req.files.song[0].fieldname === "song") {
+            req.body.song = req.files.song[0].filename;   
+
             const extname = path.extname(req.files.song[0].filename).replace(".", ""); // Récupère l'extension du fichier sans le "." 
             req.body.format = extname;
+        }
 
-            req.body.song = req.files.song[0].filename;
+        if(req.coverFileTypeError) {
+            res.status(400).json({coverFileTypeError: req.coverFileTypeError});
+            return;
+        } 
+
+        if(req.prodFileTypeError) {
+            res.status(400).json({prodFileTypeError: req.prodFileTypeError});
+            return;
         }
 
         const prod = await Prods.findById(req.params.id);
@@ -201,9 +205,11 @@ router.patch("/api/prods/:id", auth, upload.fields([{ name: 'cover', maxCount: 1
         const prodToUpdate = await Prods.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true, useFindAndModify: false});
 
         res.send(prodToUpdate);
+    }
     } catch (error) {
         res.status(400).send(error);
     }
+});
 });
 
     router.delete("/api/prods/:id", auth, async (req, res) => {

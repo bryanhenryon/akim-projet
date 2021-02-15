@@ -23,7 +23,7 @@ const usersSchema = new mongoose.Schema({
       );
       const checkedEmail = regex.test(value);
 
-      if(!checkedEmail) throw new Error("Email invalide");
+      if(!checkedEmail) throw new Error("L'adresse email indiquée est incorrecte");
     }
   },
   description:  {

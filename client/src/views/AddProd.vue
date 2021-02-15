@@ -175,7 +175,22 @@ export default {
   },
   methods: {
     submit() {
+      if (!this.prod.title) {
+        this.prod.titleError = "Veuillez indiquer le titre de la prod";
+        return;
+      } else {
+        this.prod.titleError = "";
+      }
+
+      if (!this.prod.song) {
+        this.prod.audioFileError = "Veuillez indiquer la prod à ajouter";
+        return;
+      } else {
+        this.prod.audioFileError = "";
+      }
+
       this.isLoading = true;
+
       const bodyFormData = new FormData();
       bodyFormData.append("title", this.prod.title);
       bodyFormData.append("song", this.prod.song);
@@ -220,9 +235,24 @@ export default {
         })
         .catch(error => {
           this.isLoading = false;
-          this.prod.audioFileError = error.response.data.errors.song;
-          this.prod.titleError = error.response.data.errors.title;
-          this.prod.priceError = error.response.data.errors.price;
+
+          if (error.response.data.coverSizeError) {
+            this.prod.coverFileError = error.response.data.coverSizeError;
+          } else if (error.response.data.coverFileTypeError) {
+            this.prod.coverFileError = error.response.data.coverFileTypeError;
+          } else {
+            this.prod.coverFileError = "";
+          }
+
+          if (error.response.data.songSizeError) {
+            this.prod.audioFileError = error.response.data.songSizeError;
+          } else if (error.response.data.prodFileTypeError) {
+            this.prod.audioFileError = error.response.data.prodFileTypeError;
+          } else if (error.response.data.message) {
+            this.prod.audioFileError = error.response.data.message;
+          } else {
+            this.prod.audioFileError = "";
+          }
         });
     },
     triggerAudioFileBtn() {

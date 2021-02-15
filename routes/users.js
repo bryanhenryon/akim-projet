@@ -70,8 +70,6 @@ router.get("/api/user/profile_picture/:filename", (req, res) => {
     res.sendFile(path.resolve('uploads/users/profile_pictures/' + req.params.filename));
 });
 
-
-
 router.post("/api/users", async (req, res) => {
     try {
         const user = await new Users(req.body);
@@ -115,33 +113,86 @@ const storage = multer.diskStorage({
     },
   });
 
-  const upload = multer({ storage });
+  const upload = multer({ 
+      fileFilter(req, file, cb) {
+        if(!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
+            req.coverFileTypeError  = "Veuillez indiquer un fichier au format .png, .jpg ou .jpeg"
+            cb(null, false);
+         } else {
+            cb(null, true);
+         }
+      },
+      storage,
+      limits: { fileSize: 1024 * 1024 * 10}
+    }).single("profilePicture");
 
-router.patch("/api/users/me", auth, upload.single("profilePicture"), async (req, res) => {
+  
+const handleErrors2 = (err) => {
+    let errors = { 
+        email: ''
+     }
+
+    if(err.message.includes("Validation failed: email")) {
+        Object.values(err.errors).forEach(({ properties }) => {
+               if(properties.type === "unique") {
+                   errors.email = "Cette adresse est déjà utilisée"
+               } else {
+                   errors.email = properties.message
+               }
+        });
+    }
+
+    return errors;
+}
+
+
+router.patch("/api/users/me", auth, async (req, res) => {
     try {
-        const user = await Users.findOne({_id: req.user._id});
-
-        if(!user) {
-            return res.status(404).send("L'utilisateur n'existe pas");
-        }
-
-        if(req.file) {
-            req.body.profilePicture = req.file.filename;
-            if(user.profilePicture !== "profile-picture-placeholder.png") {
-                fs.unlink("uploads/users/profile_pictures/" + user.profilePicture, (err) => {
-                    if (err) {
-                      console.error(err)
-                      return
+        upload(req, res, async function (err) {
+            if (err) {
+                res.status(400).json({coverSizeError: "Le fichier est trop volumineux, 10 Mo maximum autorisés"})
+                return;
+            } else {
+                const user = await Users.findOne({_id: req.user._id});
+        
+                if(!user) {
+                    return res.status(404).send("L'utilisateur n'existe pas");
+                }
+        
+                if(req.coverFileTypeError) {
+                    return res.status(400).json({"coverFileTypeError": req.coverFileTypeError});
+                }
+                
+                if(user.profilePicture !== "profile-picture-placeholder.png") {
+                        fs.unlink("uploads/users/profile_pictures/" + user.profilePicture, (err) => {
+                            if (err) {
+                                console.error(err)
+                                return
+                            }
+                        });
                     }
-                });
+        
+                if(req.file) {
+                    req.body.profilePicture = req.file.filename;
+                    if(user.profilePicture !== "profile-picture-placeholder.png") {
+                        fs.unlink("uploads/users/profile_pictures/" + user.profilePicture, (err) => {
+                            if (err) {
+                                console.error(err)
+                                return
+                            }
+                        });
+                    }
+                }
+        
+                const userToUpdate = await Users.findByIdAndUpdate(req.user._id, req.body, {  runValidators: true, context: 'query', useFindAndModify: false });
+                res.send(userToUpdate);
+
             }
-        }
+        });
 
-        const userToUpdate = await Users.findByIdAndUpdate(req.user._id, req.body, {  runValidators: true, context: 'query', useFindAndModify: false });
-
-        res.send(userToUpdate);
     } catch (e) {
-        res.status(400).send(e);
+        const errors = handleErrors2(e);
+        res.status(400).send(errors);
     }
 });
 
