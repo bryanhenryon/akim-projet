@@ -9,15 +9,7 @@ const router = express.Router();
 
 router.get("/api/prods", async (req, res) => {
     try {
-        const query = req.query;
-
-        const prods = await Prods.find({
-            $or:[
-                { title: { $regex : new RegExp(query.search, "i") }  },
-                { artist: { $regex : new RegExp(query.search, "i") } },
-                { tags: { $regex : new RegExp(query.search, "i") } } 
-            ] 
-        }).sort({_id: -1})
+        const prods = await Prods.find({}).sort({_id: -1})
 
         const stringified = JSON.stringify(prods, null, 2);
         res.type('json').send(stringified);

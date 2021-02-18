@@ -5,19 +5,39 @@
         Phrase d'accroche importante pour le référencement
       </h1>
       <form class="searchbar" @submit.prevent="search">
-        <button type="submit">
-          <svg class="icon icon-search">
-            <use xlink:href="sprite.svg#icon-search"></use>
-          </svg>
-        </button>
-        <input
-          type="text"
-          name=""
-          spellcheck="false"
-          class="searchbar-input"
-          placeholder="Que recherchez-vous ?"
-          v-model="searchValue"
-        />
+        <div class="d-flex align-items-center">
+          <button type="submit">
+            <svg class="icon icon-search">
+              <use xlink:href="sprite.svg#icon-search"></use>
+            </svg>
+          </button>
+          <input
+            type="text"
+            name=""
+            spellcheck="false"
+            class="searchbar-input"
+            placeholder="Que recherchez-vous ?"
+            v-model="searchValue"
+          />
+          <button
+            @click="showFilterMenu"
+            type="button"
+            class="btn btn--filter-by"
+          >
+            <span class="filter-by-indicator">{{ filterBy }}</span>
+            <svg class="icon icon-chevron-down--filter-by">
+              <use xlink:href="sprite.svg#icon-chevron-down"></use>
+            </svg>
+          </button>
+        </div>
+        <div class="filter-by-menu">
+          <ul>
+            <li @click="setFilter('Tous')">Tous</li>
+            <li @click="setFilter('Titres')">Titres</li>
+            <li @click="setFilter('Artistes')">Artistes</li>
+            <li @click="setFilter('Tags')">Tags</li>
+          </ul>
+        </div>
       </form>
     </div>
   </div>
@@ -27,7 +47,8 @@
 export default {
   data() {
     return {
-      searchValue: null
+      searchValue: null,
+      filterBy: "Tous"
     };
   },
   methods: {
@@ -38,6 +59,38 @@ export default {
       };
 
       this.$router.push(routeConfig);
+    },
+    setFilter(filter) {
+      this.filterBy = filter;
+      this.$store.dispatch("prodsList/setFilterBy", filter);
+    },
+    showFilterMenu() {
+      const btnFilter = document.querySelector(".btn--filter-by");
+      const filterMenu = document.querySelector(".filter-by-menu");
+      const iconChevronDown = document.querySelector(
+        ".icon-chevron-down--filter-by"
+      );
+
+      btnFilter.classList.toggle("active");
+
+      if (btnFilter.classList.contains("active")) {
+        iconChevronDown.style.transform = "rotate(180deg)";
+        filterMenu.style.transform = "scale(1)";
+
+        window.addEventListener("click", e => {
+          e.target !== btnFilter
+            ? this.hideFilterMenu(btnFilter, filterMenu, iconChevronDown)
+            : false;
+        });
+      } else {
+        iconChevronDown.style.transform = "rotate(0)";
+        filterMenu.style.transform = "scale(0)";
+      }
+    },
+    hideFilterMenu(btnFilter, filterMenu, iconChevronDown) {
+      btnFilter.classList.remove("active");
+      iconChevronDown.style.transform = "rotate(0)";
+      filterMenu.style.transform = "scale(0)";
     }
   }
 };
@@ -90,11 +143,10 @@ export default {
     }
 
     .searchbar {
+      position: relative;
       background: #fff;
       border-radius: 0.3rem;
       padding: 1rem;
-      display: flex;
-      align-items: center;
       width: 100%;
 
       @media (max-width: 480px) {
@@ -123,6 +175,64 @@ export default {
         }
       }
 
+      .btn--filter-by {
+        display: flex;
+        align-items: center;
+        margin: 0 1rem;
+        color: rgba($color: $color-black, $alpha: 1);
+        font-size: 1.6rem;
+        padding-left: 1rem;
+        border-left: 1px solid rgba($color: $color-black, $alpha: 0.2);
+
+        @media (max-width: 480px) {
+          font-size: 1.4rem;
+        }
+
+        * {
+          pointer-events: none;
+        }
+
+        .icon-chevron-down--filter-by {
+          width: 1.8rem;
+          height: 1.8rem;
+          fill: rgba($color: $color-black, $alpha: 1);
+          margin-left: 0.5rem;
+          transition: transform 0.2s ease-in-out;
+        }
+      }
+
+      .filter-by-menu {
+        position: absolute;
+        right: 0;
+        width: 125px;
+        z-index: 101;
+        margin-top: 20px;
+        transform: scale(0);
+        transition: transform 0.1s ease-in-out;
+        transform-origin: top;
+
+        ul {
+          list-style: none;
+          background: $color-white;
+          border-radius: 5px;
+          padding: 0.5rem 0;
+
+          li {
+            font-size: 1.6rem;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            color: $color-black;
+            &:hover {
+              font-weight: 500;
+            }
+
+            @media (max-width: 480px) {
+              font-size: 1.4rem;
+            }
+          }
+        }
+      }
+
       button[type="submit"] {
         display: flex;
         background: none;
@@ -134,7 +244,7 @@ export default {
         .icon-search {
           height: 1.6rem;
           width: 1.6rem;
-          fill: rgba($color-black, 0.7);
+          fill: rgba($color: $color-black, $alpha: 1);
         }
       }
     }

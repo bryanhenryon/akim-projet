@@ -6,7 +6,7 @@
     </div>
     <div class="cards">
       <div class="no-results" v-if="noResults">
-        Aucun résultat trouvé
+        Aucune prod n'a encore été ajoutée
       </div>
       <div class="card" v-for="(prod, index) of latestProds" :key="index">
         <div class="image">

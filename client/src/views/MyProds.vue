@@ -47,19 +47,34 @@
       <div v-if="!noProd" class="utils-container">
         <div class="search-filter">
           <div class="searchbar">
-            <button class="btn btn--search">
-              <svg class="icon icon-search">
-                <use xlink:href="sprite.svg#icon-search"></use>
-              </svg>
-            </button>
-            <input
-              type="text"
-              name=""
-              spellcheck="false"
-              class="searchbar-input"
-              placeholder="Rechercher"
-              @keyup="searchProd"
-            />
+            <div class="d-flex align-items-center">
+              <button class="btn btn--search">
+                <svg class="icon icon-search">
+                  <use xlink:href="sprite.svg#icon-search"></use>
+                </svg>
+              </button>
+              <input
+                type="text"
+                name=""
+                spellcheck="false"
+                class="searchbar-input"
+                placeholder="Rechercher"
+                @keyup="searchProd"
+              />
+              <button @click="showFilterMenu" class="btn btn--filter-by">
+                <span class="filter-by-indicator">{{ filterBy }}</span>
+                <svg class="icon icon-chevron-down--filter-by">
+                  <use xlink:href="sprite.svg#icon-chevron-down"></use>
+                </svg>
+              </button>
+            </div>
+            <div class="filter-by-menu">
+              <ul>
+                <li @click="setFilter('Tous')">Tous</li>
+                <li @click="setFilter('Titres')">Titres</li>
+                <li @click="setFilter('Tags')">Tags</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="sort-by">
@@ -89,8 +104,11 @@
           Ajouter une prod
         </router-link>
       </div>
-      <div v-if="noResult" class="no-result">
-        Aucun résultat trouvé
+      <div v-else-if="noResult" class="no-result">
+        <div>Aucun résultat trouvé</div>
+        <button class="btn btn--clear-filters" @click="clearFilters">
+          Retirer les filtres
+        </button>
       </div>
       <table v-else class="table" v-for="(prod, index) of prods" :key="index">
         <thead>
@@ -171,7 +189,8 @@ export default {
       noResult: null,
       noProd: null,
       prodToDelete: null,
-      isLoading: false
+      isLoading: false,
+      filterBy: "Tous"
     };
   },
 
@@ -196,9 +215,14 @@ export default {
             prod => prod.artist === this.user.username
           );
           this.prods = filteredProds;
-          this.prods.length === 0
-            ? (this.noProd = true)
-            : (this.noProd = false);
+
+          if (this.prods.length === 0) {
+            this.noProd = true;
+            this.noResult = true;
+          } else {
+            this.noProd = false;
+            this.noResult = false;
+          }
         })
         .catch(err => console.log(err));
     },
@@ -223,26 +247,117 @@ export default {
       confirmModal.classList.remove("active");
       this.prodToDelete = null;
     },
-    searchProd(e) {
-      const searchValue = e.target.value.toLowerCase();
+    setFilter(filter) {
+      const searchValue = document
+        .querySelector(".searchbar-input")
+        .value.toLowerCase();
+      this.filterBy = filter;
+
       axios
-        .get(this.apiRoot + "prods/" + this.user.username)
+        .get(this.apiRoot + "prods")
         .then(res => {
           const prods = res.data;
 
           const filteredProds = prods.filter(data => {
-            return (
-              data.title.toLowerCase().includes(searchValue) ||
-              data.tags
-                .toString()
-                .toLowerCase()
-                .includes(searchValue)
-            );
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
+          });
+          document.querySelector(".filter-by-indicator").textContent = filter;
+
+          if (filteredProds.length === 0) {
+            this.noResult = true;
+          } else {
+            this.noResult = false;
+          }
+
+          this.prods = filteredProds;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    showFilterMenu() {
+      const btnFilter = document.querySelector(".btn--filter-by");
+      const filterMenu = document.querySelector(".filter-by-menu");
+      const iconChevronDown = document.querySelector(
+        ".icon-chevron-down--filter-by"
+      );
+
+      btnFilter.classList.toggle("active");
+
+      if (btnFilter.classList.contains("active")) {
+        iconChevronDown.style.transform = "rotate(180deg)";
+        filterMenu.style.display = "block";
+
+        window.addEventListener("click", e => {
+          e.target !== btnFilter
+            ? this.hideFilterMenu(btnFilter, filterMenu, iconChevronDown)
+            : false;
+        });
+      } else {
+        iconChevronDown.style.transform = "rotate(0)";
+        filterMenu.style.display = "none";
+      }
+    },
+    hideFilterMenu(btnFilter, filterMenu, iconChevronDown) {
+      btnFilter.classList.remove("active");
+      iconChevronDown.style.transform = "rotate(0)";
+      filterMenu.style.display = "none";
+    },
+    clearFilters() {
+      this.filterBy = "Tous";
+      document.querySelector(".searchbar-input").value = "";
+      this.fetchUserProds();
+    },
+    searchProd(e) {
+      const searchValue = e.target.value.trim().toLowerCase();
+      axios
+        .get(this.apiRoot + "prods")
+        .then(res => {
+          const prods = res.data;
+
+          const filteredProds = prods.filter(data => {
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
           });
 
-          filteredProds.length === 0
-            ? (this.noResult = true)
-            : (this.noResult = false);
+          if (filteredProds.length === 0) {
+            this.noResult = true;
+          } else {
+            this.noResult = false;
+          }
 
           this.prods = filteredProds;
         })
@@ -451,17 +566,11 @@ export default {
 }
 
 .searchbar {
+  position: relative;
   border-radius: 2px;
-  display: flex;
-  align-items: center;
-  width: 500px;
+  width: 400px;
   background: #262626;
   padding: 0 1rem;
-  margin-right: 2rem;
-
-  @media (max-width: 1150px) {
-    width: 300px;
-  }
 
   @media (max-width: 1024px) {
     width: 100%;
@@ -502,6 +611,50 @@ export default {
       height: 1.6rem;
       width: 1.6rem;
       fill: #ccc;
+    }
+  }
+}
+
+.btn--filter-by {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem;
+  font-size: 1.3rem;
+
+  * {
+    pointer-events: none;
+  }
+
+  .icon-chevron-down--filter-by {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: $color-white;
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease-in-out;
+  }
+}
+
+.filter-by-menu {
+  position: absolute;
+  right: 0;
+  width: 125px;
+  z-index: 101;
+  display: none;
+
+  ul {
+    list-style: none;
+    background: #262626;
+    border-radius: 0 0 2px 2px;
+    padding: 0.5rem 0;
+
+    li {
+      font-size: 1.4rem;
+      padding: 1rem 2rem;
+      cursor: pointer;
+
+      &:hover {
+        font-weight: 500;
+      }
     }
   }
 }
@@ -610,7 +763,23 @@ export default {
 
 .no-result {
   text-align: center;
-  margin: 20rem 0;
+  margin-top: 10rem;
+
+  .btn--clear-filters {
+    background: none;
+    color: $color-white;
+    border: 1px solid $color-white;
+    text-transform: uppercase;
+    padding: 1.2rem 2rem;
+    transition: 0.2s ease-out;
+    letter-spacing: 1px;
+    font-size: 1.2rem;
+    margin-top: 2rem;
+
+    &:hover {
+      letter-spacing: 2px;
+    }
+  }
 }
 
 .table {

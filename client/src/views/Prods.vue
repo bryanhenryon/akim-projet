@@ -27,6 +27,10 @@ export default {
 .prods {
   color: $color-white;
   padding: 3rem 6rem;
+  min-height: 100vh;
+  background: linear-gradient(rgba(rgb(0, 0, 0), 0.7), rgba($color-black, 1)),
+    url("../assets/img/profile-background.jpg") center center fixed;
+  background-size: cover;
 
   @media (max-width: 768px) {
     padding: 3rem 2rem;

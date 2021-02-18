@@ -2,8 +2,8 @@
   <div class="prods-list">
     <h1 class="title">Prods</h1>
     <div class="utils-container">
-      <div class="search-filter">
-        <div class="searchbar">
+      <div class="searchbar">
+        <div class="d-flex align-items-center">
           <button class="btn btn--search">
             <svg class="icon icon-search">
               <use xlink:href="sprite.svg#icon-search"></use>
@@ -17,13 +17,21 @@
             placeholder="Rechercher"
             @keyup="searchProd"
           />
+          <button @click="showFilterMenu" class="btn btn--filter-by">
+            <span class="filter-by-indicator">{{ filterBy }}</span>
+            <svg class="icon icon-chevron-down--filter-by">
+              <use xlink:href="sprite.svg#icon-chevron-down"></use>
+            </svg>
+          </button>
         </div>
-        <button class="btn btn--filter" @click="showFilterModal">
-          Filtrer
-          <svg class="icon icon-funnel">
-            <use xlink:href="sprite.svg#icon-funnel"></use>
-          </svg>
-        </button>
+        <div class="filter-by-menu">
+          <ul>
+            <li @click="setFilter('Tous')">Tous</li>
+            <li @click="setFilter('Titres')">Titres</li>
+            <li @click="setFilter('Artistes')">Artistes</li>
+            <li @click="setFilter('Tags')">Tags</li>
+          </ul>
+        </div>
       </div>
       <div class="sort-by">
         <button class="btn btn--sort-by" @click="showDropdownMenu">
@@ -41,77 +49,19 @@
         </div>
       </div>
     </div>
-    <div class="filter-modal">
-      <div
-        class="filter-modal-content animate__animated animate__zoomIn animate__faster"
-      >
-        <button class="btn btn--close-modal" @click="closeFilterModal">
-          <svg class="icon icon-cross">
-            <use xlink:href="sprite.svg#icon-cross"></use>
-          </svg>
-        </button>
-        <div class="filter-modal-genre">
-          <h3 class="filter-modal-genre__title">Genres</h3>
-          <label for="all">
-            <input
-              type="radio"
-              class="genre-radio"
-              name="genre"
-              id="all"
-              checked
-              value="all"
-            />
-            Tous
-          </label>
-          <label for="hip-hop">
-            <input
-              type="radio"
-              class="genre-radio"
-              name="genre"
-              id="hip-hop"
-              value="hip-hop"
-            />
-            Hip Hop
-          </label>
-          <label for="pop">
-            <input
-              type="radio"
-              class="genre-radio"
-              name="genre"
-              id="pop"
-              value="pop"
-            />
-            Pop
-          </label>
-          <label for="rnb">
-            <input
-              type="radio"
-              class="genre-radio"
-              name="genre"
-              id="rnb"
-              value="rnb"
-            />
-            R&B
-          </label>
-          <label for="rock">
-            <input
-              type="radio"
-              class="genre-radio"
-              name="genre"
-              id="rock"
-              value="rock"
-            />
-            Rock
-          </label>
-          <button class="btn btn--apply-filter" @click="applyFilter">
-            Appliquer
-          </button>
-        </div>
-      </div>
-    </div>
     <div class="cards">
-      <div class="no-results" v-if="noResults">
-        Aucun résultat trouvé
+      <div class="no-results" v-if="noResults && !noProds">
+        <div>Aucun résultat</div>
+        <button
+          v-if="!noProds"
+          class="btn btn--clear-filters"
+          @click="clearFilters"
+        >
+          Retirer les filtres
+        </button>
+      </div>
+      <div class="no-prods" v-if="noProds">
+        <div>Aucune prod n'a encore été ajoutée</div>
       </div>
       <div class="card" v-for="(prod, index) of prods" :key="index">
         <div class="image">
@@ -178,15 +128,67 @@ export default {
   data() {
     return {
       prods: null,
-      noResults: false
+      noResults: false,
+      noProds: null
     };
   },
   computed: {
     ...mapGetters("global", {
       apiRoot: "getApiRoot"
+    }),
+    ...mapGetters("prodsList", {
+      filterBy: "getFilterBy"
     })
   },
   methods: {
+    setFilter(filter) {
+      const searchValue = document
+        .querySelector(".searchbar-input")
+        .value.toLowerCase();
+      this.$store.dispatch("prodsList/setFilterBy", filter);
+
+      axios
+        .get(this.apiRoot + "prods")
+        .then(res => {
+          const prods = res.data;
+
+          const filteredProds = prods.filter(data => {
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Artistes":
+                return data.artist.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
+          });
+          document.querySelector(".filter-by-indicator").textContent = filter;
+
+          if (filteredProds.length === 0) {
+            (this.noResults = true),
+              document.querySelector(".player").classList.remove("playing");
+          } else {
+            this.noResults = false;
+          }
+
+          this.prods = filteredProds;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
     showDropdownMenu() {
       const btnSortBy = document.querySelector(".btn--sort-by");
       const dropdownMenu = document.querySelector(".sort-by-content");
@@ -213,26 +215,78 @@ export default {
       iconChevronDown.style.transform = "rotate(0)";
       dropdownMenu.style.display = "none";
     },
-    hideModal() {
-      const filterModal = document.querySelector(".filter-modal");
-      filterModal.classList.remove("active");
+    showFilterMenu() {
+      const btnFilter = document.querySelector(".btn--filter-by");
+      const filterMenu = document.querySelector(".filter-by-menu");
+      const iconChevronDown = document.querySelector(
+        ".icon-chevron-down--filter-by"
+      );
+
+      btnFilter.classList.toggle("active");
+
+      if (btnFilter.classList.contains("active")) {
+        iconChevronDown.style.transform = "rotate(180deg)";
+        filterMenu.style.display = "block";
+
+        window.addEventListener("click", e => {
+          e.target !== btnFilter
+            ? this.hideFilterMenu(btnFilter, filterMenu, iconChevronDown)
+            : false;
+        });
+      } else {
+        iconChevronDown.style.transform = "rotate(0)";
+        filterMenu.style.display = "none";
+      }
+    },
+    hideFilterMenu(btnFilter, filterMenu, iconChevronDown) {
+      btnFilter.classList.remove("active");
+      iconChevronDown.style.transform = "rotate(0)";
+      filterMenu.style.display = "none";
+    },
+    clearFilters() {
+      this.$router.replace({ search: null });
+      this.$store.dispatch("prodsList/setFilterBy", "Tous");
+      document.querySelector(".searchbar-input").value = "";
+      axios
+        .get(this.apiRoot + "prods")
+        .then(res => {
+          const prods = res.data;
+          prods.length === 0
+            ? (this.noResults = true)
+            : (this.noResults = false);
+          this.prods = prods;
+        })
+        .catch(e => console.log(e));
     },
     searchProd(e) {
-      const searchValue = e.target.value.toLowerCase();
+      const searchValue = e.target.value.trim().toLowerCase();
       axios
         .get(this.apiRoot + "prods")
         .then(res => {
           const prods = res.data;
 
-          const filteredProds = prods.filter(
-            data =>
-              data.title.toLowerCase().includes(searchValue) ||
-              data.artist.toLowerCase().includes(searchValue) ||
-              data.tags
-                .toString()
-                .toLowerCase()
-                .includes(searchValue)
-          );
+          const filteredProds = prods.filter(data => {
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Artistes":
+                return data.artist.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
+          });
 
           if (filteredProds.length === 0) {
             (this.noResults = true),
@@ -247,79 +301,16 @@ export default {
           console.log(error);
         });
     },
-    showFilterModal() {
-      const filterModal = document.querySelector(".filter-modal");
-      filterModal.classList.add("active");
-
-      if (filterModal.classList.contains("active")) {
-        window.addEventListener("click", e => {
-          e.target == filterModal ? this.hideModal() : false;
-        });
-      }
-    },
-    applyFilter() {
-      this.closeFilterModal();
-
-      const radios = document.querySelectorAll(".genre-radio");
-      for (const radio of radios) {
-        if (radio.checked) {
-          if (radio.value !== "all") {
-            axios
-              .get(this.apiRoot + "prods", {
-                params: {
-                  search: this.searchParams
-                }
-              })
-              .then(res => {
-                const prods = res.data;
-                const filteredProds = prods.filter(prod =>
-                  prod.tags.includes(radio.value)
-                );
-
-                this.prods = filteredProds;
-
-                if (filteredProds.length === 0) {
-                  this.noResults = true;
-                  document.querySelector(".player").classList.remove("playing");
-                } else {
-                  this.noResults = false;
-                }
-              })
-              .catch(error => {
-                console.log(error);
-              });
-          } else {
-            axios
-              .get(this.apiRoot + "prods")
-              .then(res => {
-                const prods = res.data;
-                prods.length === 0
-                  ? (this.noResults = true)
-                  : (this.noResults = false);
-                this.prods = prods;
-              })
-              .catch(error => {
-                console.log(error);
-              });
-          }
-        }
-      }
-    },
-    closeFilterModal() {
-      const filterModal = document.querySelector(".filter-modal");
-      filterModal.classList.remove("active");
-    },
     sortByLatest() {
       axios
         .get(this.apiRoot + "prods")
         .then(res => {
           const prods = res.data;
-          prods.length === 0
-            ? (this.noResults = true)
-            : (this.noResults = false);
+
           const sortedProds = prods.sort((a, b) =>
             b.createdAt > a.createdAt ? 1 : -1
           );
+
           this.prods = sortedProds;
         })
         .catch(error => {
@@ -331,12 +322,11 @@ export default {
         .get(this.apiRoot + "prods")
         .then(res => {
           const prods = res.data;
-          prods.length === 0
-            ? (this.noResults = true)
-            : (this.noResults = false);
+
           const sortedProds = prods.sort((a, b) =>
             a.createdAt > b.createdAt ? 1 : -1
           );
+
           this.prods = sortedProds;
         })
         .catch(error => {
@@ -378,6 +368,7 @@ export default {
       }
     }
   },
+
   created() {
     axios
       .get(this.apiRoot + "prods", {
@@ -387,8 +378,54 @@ export default {
       })
       .then(res => {
         const prods = res.data;
-        prods.length === 0 ? (this.noResults = true) : (this.noResults = false);
-        this.prods = prods;
+
+        if (this.$route.query.search) {
+          const filteredProds = prods.filter(data => {
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(this.$route.query.search) ||
+                  data.artist
+                    .toLowerCase()
+                    .includes(this.$route.query.search) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(this.$route.query.search)
+                );
+              case "Titres":
+                return data.title
+                  .toLowerCase()
+                  .includes(this.$route.query.search);
+              case "Artistes":
+                return data.artist
+                  .toLowerCase()
+                  .includes(this.$route.query.search);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(this.$route.query.search);
+            }
+          });
+
+          filteredProds.length === 0
+            ? (this.noResults = true)
+            : (this.noResults = false);
+          this.prods = filteredProds;
+          return;
+        } else {
+          prods.length === 0
+            ? (this.noResults = true)
+            : (this.noResults = false);
+          this.prods = prods;
+        }
+
+        if (prods.length === 0) {
+          this.noProds = true;
+        } else {
+          this.noProds = false;
+        }
       })
       .catch(error => {
         console.log(error);
@@ -430,46 +467,12 @@ export default {
   }
 }
 
-.search-filter {
-  display: flex;
-  align-items: center;
-
-  .btn--filter {
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: $color-black;
-    padding: 1rem 2rem;
-    letter-spacing: 1px;
-    font-size: 1.4rem;
-    border-radius: 2px;
-    width: 150px;
-    font-weight: 500;
-    background: #262626;
-    color: $color-white;
-
-    .icon-funnel {
-      fill: $color-white;
-      width: 1.6rem;
-      height: 1.6rem;
-      margin-left: 1rem;
-    }
-  }
-}
-
 .searchbar {
+  position: relative;
   border-radius: 2px;
-  display: flex;
-  align-items: center;
-  width: 500px;
   background: #262626;
   padding: 0 1rem;
-  margin-right: 2rem;
-
-  @media (max-width: 1150px) {
-    width: 300px;
-  }
+  width: 400px;
 
   @media (max-width: 1024px) {
     width: 100%;
@@ -509,7 +512,51 @@ export default {
     .icon-search {
       height: 1.6rem;
       width: 1.6rem;
-      fill: #ccc;
+      fill: $color-white;
+    }
+  }
+}
+
+.btn--filter-by {
+  display: flex;
+  align-items: center;
+  margin: 0 1rem;
+  font-size: 1.3rem;
+
+  * {
+    pointer-events: none;
+  }
+
+  .icon-chevron-down--filter-by {
+    width: 1.6rem;
+    height: 1.6rem;
+    fill: $color-white;
+    margin-left: 0.5rem;
+    transition: transform 0.2s ease-in-out;
+  }
+}
+
+.filter-by-menu {
+  position: absolute;
+  right: 0;
+  width: 125px;
+  z-index: 101;
+  display: none;
+
+  ul {
+    list-style: none;
+    background: #262626;
+    border-radius: 0 0 2px 2px;
+    padding: 0.5rem 0;
+
+    li {
+      font-size: 1.4rem;
+      padding: 1rem 2rem;
+      cursor: pointer;
+
+      &:hover {
+        font-weight: 500;
+      }
     }
   }
 }
@@ -578,112 +625,31 @@ export default {
   }
 }
 
-.filter-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.8);
-
-  &.active {
-    display: block;
-  }
-
-  .filter-modal-content {
-    margin: 10% auto;
-    background: #262626;
-    width: 95%;
-    max-width: 400px;
-    border-radius: 5px;
-    padding: 0.5rem;
-
-    .btn--close-modal {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-left: auto;
-      padding: 1rem;
-
-      .icon-cross {
-        fill: $color-white;
-        height: 25px;
-        width: 25px;
-      }
-    }
-
-    .filter-modal-genre {
-      &__title {
-        font-size: 2.8rem;
-        margin-bottom: 1.5rem;
-      }
-      padding: 0 2rem 1rem 2rem;
-
-      label {
-        display: flex;
-        align-items: center;
-        padding: 1.5rem 0;
-        letter-spacing: 0.5px;
-        cursor: pointer;
-
-        input[type="radio"] {
-          margin-right: 1rem;
-
-          &:after {
-            width: 15px;
-            height: 15px;
-            border-radius: 15px;
-            top: -2px;
-            left: -1px;
-            position: relative;
-            background-color: #d1d3d1;
-            content: "";
-            display: inline-block;
-            visibility: visible;
-            border: 2px solid white;
-          }
-        }
-
-        input[type="radio"]:checked:after {
-          width: 15px;
-          height: 15px;
-          border-radius: 15px;
-          top: -2px;
-          left: -1px;
-          position: relative;
-          background-color: #ff3a51;
-          content: "";
-          display: inline-block;
-          visibility: visible;
-          border: 2px solid white;
-        }
-      }
-
-      .btn--apply-filter {
-        background: #ff3a51;
-        color: $color-white;
-        padding: 1rem 3rem;
-        margin-top: 1.5rem;
-        border-radius: 5px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-    }
-  }
-}
-
 .cards {
   display: flex;
   flex-wrap: wrap;
 
-  .no-results {
+  .no-results,
+  .no-prods {
     margin-top: 10rem;
     width: 100%;
     text-align: center;
+
+    .btn--clear-filters {
+      background: none;
+      color: $color-white;
+      border: 1px solid $color-white;
+      text-transform: uppercase;
+      padding: 1.2rem 2rem;
+      transition: 0.2s ease-out;
+      letter-spacing: 1px;
+      font-size: 1.2rem;
+      margin-top: 2rem;
+
+      &:hover {
+        letter-spacing: 2px;
+      }
+    }
   }
 
   .card {

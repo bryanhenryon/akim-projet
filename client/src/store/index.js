@@ -2,6 +2,7 @@ import { createStore } from "vuex";
 import global from "./modules/global";
 import signUpModal from "./modules/signUpModal";
 import signInModal from "./modules/signInModal";
+import prodsList from "./modules/prodsList";
 
 export default createStore({
   state: {
@@ -19,6 +20,7 @@ export default createStore({
   modules: {
     global,
     signUpModal,
-    signInModal
+    signInModal,
+    prodsList
   }
 });

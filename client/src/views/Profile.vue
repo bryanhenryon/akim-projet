@@ -69,19 +69,34 @@
       <div v-if="!noProd" class="utils-container">
         <div class="search-filter">
           <div class="searchbar">
-            <button class="btn btn--search">
-              <svg class="icon icon-search">
-                <use xlink:href="sprite.svg#icon-search"></use>
-              </svg>
-            </button>
-            <input
-              type="text"
-              name=""
-              spellcheck="false"
-              class="searchbar-input"
-              placeholder="Rechercher"
-              @keyup="searchProd"
-            />
+            <div class="d-flex align-items-center">
+              <button class="btn btn--search">
+                <svg class="icon icon-search">
+                  <use xlink:href="sprite.svg#icon-search"></use>
+                </svg>
+              </button>
+              <input
+                type="text"
+                name=""
+                spellcheck="false"
+                class="searchbar-input"
+                placeholder="Rechercher"
+                @keyup="searchProd"
+              />
+              <button @click="showFilterMenu" class="btn btn--filter-by">
+                <span class="filter-by-indicator">Tous</span>
+                <svg class="icon icon-chevron-down--filter-by">
+                  <use xlink:href="sprite.svg#icon-chevron-down"></use>
+                </svg>
+              </button>
+            </div>
+            <div class="filter-by-menu">
+              <ul>
+                <li @click="setFilter('Tous')">Tous</li>
+                <li @click="setFilter('Titres')">Titres</li>
+                <li @click="setFilter('Tags')">Tags</li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="sort-by">
@@ -205,7 +220,8 @@ export default {
       user: "",
       prods: null,
       noProd: null,
-      noResult: null
+      noResult: null,
+      filterBy: "Tous"
     };
   },
   computed: {
@@ -223,6 +239,82 @@ export default {
     }
   },
   methods: {
+    setFilter(filter) {
+      const searchValue = document
+        .querySelector(".searchbar-input")
+        .value.toLowerCase();
+      this.filterBy = filter;
+
+      axios
+        .get(this.apiRoot + "prods")
+        .then(res => {
+          const prods = res.data;
+
+          const filteredProds = prods.filter(data => {
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Artistes":
+                return data.artist.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
+          });
+          document.querySelector(".filter-by-indicator").textContent = filter;
+
+          if (filteredProds.length === 0) {
+            (this.noResult = true),
+              document.querySelector(".player").classList.remove("playing");
+          } else {
+            this.noResult = false;
+          }
+
+          this.prods = filteredProds;
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
+    showFilterMenu() {
+      const btnFilter = document.querySelector(".btn--filter-by");
+      const filterMenu = document.querySelector(".filter-by-menu");
+      const iconChevronDown = document.querySelector(
+        ".icon-chevron-down--filter-by"
+      );
+
+      btnFilter.classList.toggle("active");
+
+      if (btnFilter.classList.contains("active")) {
+        iconChevronDown.style.transform = "rotate(180deg)";
+        filterMenu.style.display = "block";
+
+        window.addEventListener("click", e => {
+          e.target !== btnFilter
+            ? this.hideFilterMenu(btnFilter, filterMenu, iconChevronDown)
+            : false;
+        });
+      } else {
+        iconChevronDown.style.transform = "rotate(0)";
+        filterMenu.style.display = "none";
+      }
+    },
+    hideFilterMenu(btnFilter, filterMenu, iconChevronDown) {
+      btnFilter.classList.remove("active");
+      iconChevronDown.style.transform = "rotate(0)";
+      filterMenu.style.display = "none";
+    },
     showDropdownMenu() {
       const btnSortBy = document.querySelector(".btn--sort-by");
       const dropdownMenu = document.querySelector(".sort-by-content");
@@ -278,20 +370,33 @@ export default {
         });
     },
     searchProd(e) {
-      const searchValue = e.target.value.toLowerCase();
+      const searchValue = e.target.value.trim().toLowerCase();
       axios
-        .get(this.apiRoot + "prods/" + this.$route.params.username)
+        .get(this.apiRoot + "prods")
         .then(res => {
           const prods = res.data;
 
           const filteredProds = prods.filter(data => {
-            return (
-              data.title.toLowerCase().includes(searchValue) ||
-              data.tags
-                .toString()
-                .toLowerCase()
-                .includes(searchValue)
-            );
+            switch (this.filterBy) {
+              case "Tous":
+                return (
+                  data.title.toLowerCase().includes(searchValue) ||
+                  data.artist.toLowerCase().includes(searchValue) ||
+                  data.tags
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchValue)
+                );
+              case "Titres":
+                return data.title.toLowerCase().includes(searchValue);
+              case "Artistes":
+                return data.artist.toLowerCase().includes(searchValue);
+              case "Tags":
+                return data.tags
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchValue);
+            }
           });
 
           if (filteredProds.length === 0) {
@@ -488,17 +593,11 @@ export default {
   }
 
   .searchbar {
+    position: relative;
     border-radius: 2px;
-    display: flex;
-    align-items: center;
-    width: 500px;
+    width: 400px;
     background: #262626;
     padding: 0 1rem;
-    margin-right: 2rem;
-
-    @media (max-width: 1150px) {
-      width: 300px;
-    }
 
     @media (max-width: 1024px) {
       width: 100%;
@@ -539,6 +638,50 @@ export default {
         height: 1.6rem;
         width: 1.6rem;
         fill: #ccc;
+      }
+    }
+  }
+
+  .btn--filter-by {
+    display: flex;
+    align-items: center;
+    margin: 0 1rem;
+    font-size: 1.3rem;
+
+    * {
+      pointer-events: none;
+    }
+
+    .icon-chevron-down--filter-by {
+      width: 1.6rem;
+      height: 1.6rem;
+      fill: $color-white;
+      margin-left: 0.5rem;
+      transition: transform 0.2s ease-in-out;
+    }
+  }
+
+  .filter-by-menu {
+    position: absolute;
+    right: 0;
+    width: 125px;
+    z-index: 101;
+    display: none;
+
+    ul {
+      list-style: none;
+      background: #262626;
+      border-radius: 0 0 2px 2px;
+      padding: 0.5rem 0;
+
+      li {
+        font-size: 1.4rem;
+        padding: 1rem 2rem;
+        cursor: pointer;
+
+        &:hover {
+          font-weight: 500;
+        }
       }
     }
   }
