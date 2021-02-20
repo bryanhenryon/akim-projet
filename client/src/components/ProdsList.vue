@@ -629,6 +629,10 @@ export default {
   display: flex;
   flex-wrap: wrap;
 
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+
   .no-results,
   .no-prods {
     margin-top: 10rem;

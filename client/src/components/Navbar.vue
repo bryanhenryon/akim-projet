@@ -1,6 +1,16 @@
 <template>
   <nav class="navbar">
-    <div class="navbar_logo">LOGO / NOM DU SITE</div>
+    <div class="navbar_link navbar_logo">LOGO / NOM DU SITE</div>
+    <div class="navbar_links">
+      <router-link :to="{ name: 'Home' }" class="navbar_link navbar_link--home"
+        >Accueil</router-link
+      >
+      <router-link
+        :to="{ name: 'Prods' }"
+        class="navbar_link navbar_link--see-prods"
+        >Parcourir les prods</router-link
+      >
+    </div>
     <div class="navbar_buttons">
       <button
         v-if="!jwt"
@@ -19,7 +29,7 @@
         <button
           v-if="jwt"
           class="btn navbar__user-profile-dropdown-btn"
-          @click="showDropdownMenu"
+          @click="toggleDropdownMenu"
         >
           <div class="navbar__user-img-container">
             <img
@@ -65,17 +75,19 @@
         </div>
       </div>
     </div>
-    <button class="btn btn--menu">
+    <button @click="toggleMobileNavbar" class="btn btn--menu">
       <svg class="icon icon-menu">
         <use xlink:href="sprite.svg#icon-menu"></use>
       </svg>
     </button>
+    <app-mobile-navbar></app-mobile-navbar>
   </nav>
 </template>
 
 <script>
 import "animate.css";
-import { mapState, mapGetters } from "vuex";
+import { mapState, mapGetters, mapActions } from "vuex";
+import MobileNavbar from "./MobileNavbar";
 
 export default {
   computed: {
@@ -84,92 +96,29 @@ export default {
       apiRoot: "getApiRoot"
     })
   },
+  components: {
+    "app-mobile-navbar": MobileNavbar
+  },
   methods: {
-    showSignUpModal() {
-      const signUpModal = document.querySelector(".sign-up-modal");
-      const signUpModalContent = document.querySelector(
-        ".sign-up-modal__content"
-      );
+    ...mapActions({
+      toggleMobileNavbar: "navbar/toggleMobileNavbar",
+      showSignUpModal: "navbar/showSignUpModal",
+      showSignInModal: "navbar/showSignInModal",
+      toggleDropdownMenu: "navbar/toggleDropdownMenu",
+      logout: "navbar/logout"
+    })
+  },
+  mounted() {
+    const navLinks = document.querySelectorAll(".navbar_link");
+    const currentLocation = window.location.href.replace(
+      /^http[s]?:\/\/.+?\//,
+      ""
+    );
 
-      signUpModalContent.classList.add(
-        "animate__animated",
-        "animate__slideInDown",
-        "animate__faster"
-      );
-
-      signUpModal.classList.add("active");
-
-      if (signUpModal.classList.contains("active")) {
-        window.addEventListener("click", e => {
-          if (e.target === signUpModal) {
-            signUpModal.classList.remove("active");
-            this.$store.commit("signUpModal/resetForm");
-          } else {
-            return false;
-          }
-        });
+    for (let navLink of navLinks) {
+      if (navLink.getAttribute("href") === "/" + currentLocation) {
+        navLink.classList.add("active");
       }
-    },
-    showSignInModal() {
-      const signInModal = document.querySelector(".sign-in-modal");
-      const signInModalContent = document.querySelector(
-        ".sign-in-modal__content"
-      );
-
-      signInModalContent.classList.add(
-        "animate__animated",
-        "animate__slideInDown",
-        "animate__faster"
-      );
-      signInModal.classList.add("active");
-
-      if (signInModal.classList.contains("active")) {
-        window.addEventListener("click", e => {
-          if (e.target === signInModal) {
-            signInModal.classList.remove("active");
-            this.$store.dispatch("signInModal/resetForm");
-          } else {
-            return false;
-          }
-        });
-      }
-    },
-    showDropdownMenu(e) {
-      const currentTarget = e.currentTarget;
-
-      const profileDropdownMenu = document.querySelector(
-        ".navbar__user-profile-dropdown-menu"
-      );
-      const iconChevronDown = document.querySelector(
-        ".icon-chevron-down--profile-dropdown-btn"
-      );
-
-      currentTarget.classList.toggle("active");
-
-      if (currentTarget.classList.contains("active")) {
-        iconChevronDown.style.transform = "rotate(180deg)";
-        profileDropdownMenu.style.display = "block";
-
-        window.addEventListener("click", e => {
-          if (e.target !== currentTarget) {
-            currentTarget.classList.remove("active");
-            iconChevronDown.style.transform = "rotate(0)";
-            profileDropdownMenu.style.display = "none";
-          } else {
-            false;
-          }
-        });
-      } else {
-        iconChevronDown.style.transform = "rotate(0)";
-        profileDropdownMenu.style.display = "none";
-      }
-    },
-    logout() {
-      localStorage.removeItem("jwt");
-      localStorage.removeItem("user");
-      this.$store.dispatch("setToken", null);
-      this.$store.dispatch("setUser", null);
-      this.$router.push("/");
     }
   }
 };
@@ -180,7 +129,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 2rem;
 
   &_logo {
     margin-right: 1rem;
@@ -190,8 +138,44 @@ export default {
     }
   }
 
+  &_links {
+    display: flex;
+    align-items: center;
+    @media (max-width: 800px) {
+      display: none;
+    }
+  }
+
+  &_link {
+    margin-right: 5rem;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+  }
+
+  &_link--home,
+  &_link--see-prods {
+    position: relative;
+    color: inherit;
+    text-decoration: none;
+    transition: 0.2s;
+    padding: 1rem 2rem;
+
+    &.active {
+      &:before {
+        content: "";
+        border-bottom: 2px solid $color-white;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        transform: translateY(10px);
+      }
+    }
+  }
+
   &_buttons {
-    @media (max-width: 960px) {
+    @media (max-width: 1400px) {
       display: none;
     }
   }
@@ -200,7 +184,7 @@ export default {
     display: none;
     padding: 0 !important;
 
-    @media (max-width: 960px) {
+    @media (max-width: 1400px) {
       display: block;
     }
 
@@ -210,6 +194,7 @@ export default {
       width: 4rem;
     }
   }
+
   .btn-buy {
     margin-right: 5rem;
     background: $color-white;

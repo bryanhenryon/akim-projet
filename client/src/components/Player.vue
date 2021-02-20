@@ -75,6 +75,7 @@
   transition: transform 0.5s ease-in-out;
   padding: 0 6rem;
   color: $color-white;
+  margin-top: 100px;
 
   @media (max-width: 680px) {
     padding: 0 2rem;

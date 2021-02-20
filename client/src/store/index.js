@@ -3,6 +3,7 @@ import global from "./modules/global";
 import signUpModal from "./modules/signUpModal";
 import signInModal from "./modules/signInModal";
 import prodsList from "./modules/prodsList";
+import navbar from "./modules/navbar";
 
 export default createStore({
   state: {
@@ -21,6 +22,7 @@ export default createStore({
     global,
     signUpModal,
     signInModal,
-    prodsList
+    prodsList,
+    navbar
   }
 });

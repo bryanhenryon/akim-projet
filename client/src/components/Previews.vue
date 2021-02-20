@@ -195,6 +195,10 @@ export default {
     display: flex;
     flex-wrap: wrap;
 
+    @media (max-width: 768px) {
+      justify-content: center;
+    }
+
     .no-results {
       margin: 10rem 0;
       width: 100%;

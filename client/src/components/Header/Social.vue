@@ -33,6 +33,31 @@
   flex-direction: column;
   list-style: none;
 
+  &.mobile {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+
+    @media (max-width: 680px) {
+      display: flex;
+    }
+
+    .social__item {
+      margin-top: 0;
+      margin-right: 5rem;
+
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    .icon {
+      fill: $color-white;
+      height: 2rem;
+      width: 2rem;
+    }
+  }
+
   @media (max-width: 680px) {
     display: none;
   }

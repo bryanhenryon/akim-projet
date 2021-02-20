@@ -30,7 +30,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(rgba(rgb(0, 0, 0), 0.2), rgba($color-black, 1)),
+  background: linear-gradient(rgba(rgb(0, 0, 0), 0.1), rgba($color-black, 1)),
     url("../assets/img/header-background.jpg");
   background-size: cover;
   background-repeat: no-repeat;
