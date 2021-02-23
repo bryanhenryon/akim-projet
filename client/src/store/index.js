@@ -4,7 +4,7 @@ import signUpModal from "./modules/signUpModal";
 import signInModal from "./modules/signInModal";
 import prodsList from "./modules/prodsList";
 import navbar from "./modules/navbar";
-
+import player from "./modules/player";
 export default createStore({
   state: {
     jwt: localStorage.getItem("jwt"),
@@ -23,6 +23,7 @@ export default createStore({
     signUpModal,
     signInModal,
     prodsList,
-    navbar
+    navbar,
+    player
   }
 });

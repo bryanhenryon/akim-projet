@@ -15,7 +15,7 @@
             draggable="false"
             alt=""
           />
-          <button class="btn btn--play" @click="play">
+          <button class="btn btn--play" @click="play(index, $event)">
             <svg class="icon icon-controller-play">
               <use xlink:href="sprite.svg#icon-controller-play"></use>
             </svg>
@@ -88,13 +88,13 @@ export default {
     "app-player": Player
   },
   methods: {
-    play(e) {
+    play(index, $event) {
       document.querySelector(".player").classList.add("playing");
       document.querySelector(".btn--play2").classList.add("playing");
 
-      const audio = e.currentTarget.nextSibling;
+      const audio = $event.currentTarget.nextSibling;
       const allBtn = document.querySelectorAll(".btn--play");
-      const isPlaying = e.currentTarget.classList.contains("active");
+      const isPlaying = $event.currentTarget.classList.contains("active");
 
       for (const btn of allBtn) {
         if (btn.classList.contains("active")) {
@@ -102,24 +102,41 @@ export default {
           btn.nextSibling.pause();
         }
 
-        if (btn !== e.currentTarget) {
+        if (btn !== $event.currentTarget) {
           btn.nextSibling.currentTime = 0;
         }
       }
 
       if (isPlaying) {
-        e.currentTarget.classList.remove("active");
+        $event.currentTarget.classList.remove("active");
         document.querySelector(".btn--play2").classList.remove("playing");
         audio.pause();
       } else {
-        e.currentTarget.classList.add("active");
+        $event.currentTarget.classList.add("active");
         audio.play();
+
         if (
           document.querySelector(".btn--sound").classList.contains("active")
         ) {
           audio.muted = true;
         }
       }
+
+      const card = $event.currentTarget.parentElement.parentElement;
+      const artist = card.querySelector(".author").textContent;
+      const title = card.querySelector(".title").textContent;
+      const targetIndex = index;
+
+      const playingSong = {
+        target: $event.currentTarget,
+        targetIndex: targetIndex,
+        artist: artist,
+        title: title,
+        image: $event.currentTarget.previousSibling.src,
+        audio: audio
+      };
+
+      this.$store.dispatch("player/playingSong", playingSong);
     }
   },
   created() {

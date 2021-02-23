@@ -4,14 +4,23 @@
       <div class="track-infos">
         <div class="track-infos__image">
           <img
-            src="../assets/img/placeholder.jpg"
+            v-if="song"
+            :src="song.image"
             alt="Couverture du morceau"
             draggable="false"
           />
         </div>
         <div class="track-infos__container">
-          <div class="track-infos__track-name">Titre du morceau</div>
-          <div class="track-infos__artist-name">Artiste</div>
+          <div v-if="song" class="track-infos__track-name">
+            {{ song.title }}
+          </div>
+          <router-link
+            :to="'/profil/' + song.artist"
+            v-if="song"
+            class="track-infos__artist-name"
+          >
+            {{ song.artist }}
+          </router-link>
         </div>
       </div>
       <div class="controller">
@@ -49,6 +58,7 @@
           </svg>
         </button>
         <input
+          v-model="songVolume"
           type="range"
           class="volume"
           name="volume"
@@ -60,6 +70,190 @@
     </div>
   </div>
 </template>
+
+<script>
+import { mapGetters } from "vuex";
+export default {
+  data() {
+    return {
+      songVolume: null
+    };
+  },
+  watch: {
+    songVolume() {
+      const soundBtn = document.querySelector(".btn--sound");
+      this.song.target.nextSibling.volume = this.songVolume;
+
+      if (this.song.target.nextSibling.volume === 0) {
+        this.song.target.nextSibling.muted = true;
+        soundBtn.classList.add("active");
+      } else {
+        this.song.target.nextSibling.muted = false;
+        soundBtn.classList.remove("active");
+      }
+    }
+  },
+  computed: {
+    ...mapGetters({
+      song: "player/getPlayingSong"
+    })
+  },
+  methods: {
+    play() {
+      const isPlaying = this.song.target.classList.contains("active");
+      if (isPlaying) {
+        this.song.target.classList.remove("active");
+        document.querySelector(".btn--play2").classList.remove("playing");
+        this.song.target.nextSibling.pause();
+      } else {
+        this.song.target.classList.add("active");
+        this.song.target.nextSibling.play();
+        document.querySelector(".btn--play2").classList.add("playing");
+      }
+    },
+    loop() {
+      const loopBtn = document.querySelector(".btn--loop");
+      loopBtn.classList.toggle("active");
+
+      if (loopBtn.classList.contains("active")) {
+        this.song.target.nextSibling.loop = true;
+      } else {
+        this.song.target.nextSibling.loop = false;
+      }
+    },
+    mute() {
+      const soundBtn = document.querySelector(".btn--sound");
+      soundBtn.classList.toggle("active");
+
+      if (soundBtn.classList.contains("active")) {
+        this.song.target.nextSibling.muted = true;
+      } else {
+        this.song.target.nextSibling.muted = false;
+      }
+    },
+    previous() {
+      document.querySelector(".btn--play2").classList.add("playing");
+
+      if (this.song.targetIndex === 0) {
+        this.song.targetIndex =
+          document.querySelectorAll(".btn--play").length - 1;
+      } else {
+        this.song.targetIndex = this.song.targetIndex - 1;
+      }
+
+      const nextIndex = this.song.targetIndex;
+      const nextTarget = document.querySelectorAll(".btn--play")[nextIndex];
+      const nextCard = nextTarget.parentElement.parentElement;
+
+      const audio = nextTarget.nextSibling;
+      const card = nextCard;
+      const artist = card.querySelector(".author").textContent;
+      const title = card.querySelector(".title").textContent;
+
+      const playButtons = document.querySelectorAll(".btn--play");
+      for (const playButton of playButtons) {
+        if (playButton.classList.contains("active")) {
+          playButton.classList.remove("active");
+          playButton.nextSibling.pause();
+        }
+
+        if (playButton !== nextTarget) {
+          playButton.nextSibling.currentTime = 0;
+        }
+      }
+
+      const isPlaying = nextTarget.classList.contains("active");
+
+      if (isPlaying) {
+        nextTarget.remove("active");
+        audio.pause();
+        this.song.target.nextSibling.muted = true;
+      } else {
+        nextTarget.classList.add("active");
+        audio.play();
+        this.song.target.nextSibling.muted = false;
+        if (
+          document.querySelector(".btn--sound").classList.contains("active")
+        ) {
+          audio.muted = true;
+        }
+      }
+
+      const playingSong = {
+        target: nextTarget,
+        targetIndex: nextIndex,
+        artist: artist,
+        title: title,
+        image: nextTarget.previousSibling.src,
+        audio: audio
+      };
+
+      this.$store.dispatch("player/playingSong", playingSong);
+    },
+    next() {
+      document.querySelector(".btn--play2").classList.add("playing");
+
+      if (
+        this.song.targetIndex ===
+        document.querySelectorAll(".btn--play").length - 1
+      ) {
+        this.song.targetIndex = 0;
+      } else {
+        this.song.targetIndex = this.song.targetIndex + 1;
+      }
+
+      const nextIndex = this.song.targetIndex;
+      const nextTarget = document.querySelectorAll(".btn--play")[nextIndex];
+      const nextCard = nextTarget.parentElement.parentElement;
+
+      const audio = nextTarget.nextSibling;
+      const card = nextCard;
+      const artist = card.querySelector(".author").textContent;
+      const title = card.querySelector(".title").textContent;
+
+      const playButtons = document.querySelectorAll(".btn--play");
+      for (const playButton of playButtons) {
+        if (playButton.classList.contains("active")) {
+          playButton.classList.remove("active");
+          playButton.nextSibling.pause();
+        }
+
+        if (playButton !== nextTarget) {
+          playButton.nextSibling.currentTime = 0;
+        }
+      }
+
+      const isPlaying = nextTarget.classList.contains("active");
+
+      if (isPlaying) {
+        nextTarget.remove("active");
+        audio.pause();
+        this.song.target.nextSibling.muted = true;
+      } else {
+        nextTarget.classList.add("active");
+        audio.play();
+        this.song.target.nextSibling.muted = false;
+        if (
+          document.querySelector(".btn--sound").classList.contains("active")
+        ) {
+          audio.muted = true;
+        }
+      }
+
+      const playingSong = {
+        target: nextTarget,
+        targetIndex: nextIndex,
+        artist: artist,
+        title: title,
+        image: nextTarget.previousSibling.src,
+        audio: audio
+      };
+
+      this.$store.dispatch("player/playingSong", playingSong);
+    }
+  }
+};
+</script>
 
 <style lang="scss" scoped>
 .player {
@@ -108,6 +302,8 @@
 
         img {
           width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
       }
 
@@ -130,6 +326,8 @@
 
       &__artist-name {
         font-size: 1.4rem;
+        text-decoration: none;
+        color: inherit;
 
         @media (max-width: 480px) {
           font-size: 1.2rem;
