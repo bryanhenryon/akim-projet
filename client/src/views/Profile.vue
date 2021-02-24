@@ -183,7 +183,7 @@
             </div>
             <div v-if="prod.maxStreams" class="max-streams">
               Max streams:
-              {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
+              {{ kFormatter(prod.maxStreams) }}
             </div>
             <div v-else class="max-streams">Max streams: illimité</div>
             <span class="format">{{ prod.format.toUpperCase() }}</span>
@@ -231,6 +231,9 @@ export default {
     ...mapGetters("global", {
       apiRoot: "getApiRoot"
     }),
+    ...mapGetters("player", {
+      songVolume: "getSongVolume"
+    }),
     accountCreationDate() {
       const date = new Date(this.user.createdAt);
       return (
@@ -239,6 +242,11 @@ export default {
     }
   },
   methods: {
+    kFormatter(num) {
+      return Math.abs(num) > 999
+        ? Math.sign(num) * (Math.abs(num) / 1000).toFixed(1) + "k"
+        : Math.sign(num) * Math.abs(num);
+    },
     setFilter(filter) {
       const searchValue = document
         .querySelector(".searchbar-input")
@@ -417,6 +425,7 @@ export default {
       document.querySelector(".btn--play2").classList.add("playing");
 
       const audio = $event.currentTarget.nextSibling;
+      audio.volume = this.songVolume;
       const allBtn = document.querySelectorAll(".btn--play");
       const isPlaying = $event.currentTarget.classList.contains("active");
 
@@ -461,6 +470,12 @@ export default {
       };
 
       this.$store.dispatch("player/playingSong", playingSong);
+
+      const currentTarg = $event.currentTarget;
+      audio.addEventListener("ended", () => {
+        document.querySelector(".btn--play2").classList.remove("playing");
+        currentTarg.classList.remove("active");
+      });
     }
   },
   created() {

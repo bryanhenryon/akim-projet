@@ -83,6 +83,7 @@ export default {
     songVolume() {
       const soundBtn = document.querySelector(".btn--sound");
       this.song.target.nextSibling.volume = this.songVolume;
+      this.$store.dispatch("player/setSongVolume", this.songVolume);
 
       if (this.song.target.nextSibling.volume === 0) {
         this.song.target.nextSibling.muted = true;
@@ -95,7 +96,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      song: "player/getPlayingSong"
+      song: "player/getPlayingSong",
+      songVolume2: "player/getSongVolume"
     })
   },
   methods: {
@@ -149,6 +151,8 @@ export default {
       const card = nextCard;
       const artist = card.querySelector(".author").textContent;
       const title = card.querySelector(".title").textContent;
+
+      audio.volume = this.songVolume2;
 
       const playButtons = document.querySelectorAll(".btn--play");
       for (const playButton of playButtons) {
@@ -210,6 +214,8 @@ export default {
       const card = nextCard;
       const artist = card.querySelector(".author").textContent;
       const title = card.querySelector(".title").textContent;
+
+      audio.volume = this.songVolume2;
 
       const playButtons = document.querySelectorAll(".btn--play");
       for (const playButton of playButtons) {

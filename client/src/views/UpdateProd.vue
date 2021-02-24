@@ -21,7 +21,10 @@
         </div>
         <div class="form-group">
           <label for="cover-file"
-            >Converture <span class="indicator">(optionnel)</span></label
+            >Converture
+            <span class="indicator"
+              >(optionnel &mdash; dimensions idéales : 250px * 250px)</span
+            ></label
           >
           <input
             @change="fillCoverFileCustomTxt"

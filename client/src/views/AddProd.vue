@@ -21,7 +21,10 @@
         </div>
         <div class="form-group">
           <label for="cover-file"
-            >Converture <span class="indicator">(optionnel)</span></label
+            >Converture
+            <span class="indicator"
+              >(optionnel &mdash; dimensions idéales : 250px * 250px)</span
+            ></label
           >
           <input
             @change="fillCoverFileCustomTxt"
@@ -360,11 +363,10 @@ export default {
   label {
     display: block;
     margin-bottom: 1rem;
-
-    .indicator {
-      font-size: 1.3rem;
-      margin-left: 0.5rem;
-    }
+  }
+  .indicator {
+    font-size: 1.3rem;
+    margin-left: 0.5rem;
   }
 
   input {
