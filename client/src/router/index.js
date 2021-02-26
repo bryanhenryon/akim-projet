@@ -6,6 +6,7 @@ import MyProds from "../views/MyProds";
 import AddProd from "../views/AddProd";
 import UpdateProd from "../views/UpdateProd";
 import ProfileInfos from "../views/ProfileInfos";
+import ProdDetails from "../views/ProdDetails";
 // import NewPassword from "../components/ProfileInfos/Password";
 import store from "../store";
 
@@ -19,6 +20,11 @@ const routes = [
     path: "/prods",
     name: "Prods",
     component: Prods
+  },
+  {
+    path: "/prod/:id",
+    name: "ProdDetails",
+    component: ProdDetails
   },
   {
     path: "/profil/:username",

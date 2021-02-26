@@ -108,12 +108,12 @@
             <div v-else class="max-streams">Max streams: illimité</div>
             <span class="format">{{ prod.format.toUpperCase() }}</span>
           </div>
-          <button class="btn btn--buy" @click="buyProd">
+          <router-link :to="'/prod/' + prod._id" class="btn btn--buy">
             <span>{{ prod.price }}€</span>
             <svg class="icon icon-shopping-cart">
               <use xlink:href="sprite.svg#icon-shopping-cart"></use>
             </svg>
-          </button>
+          </router-link>
         </div>
       </div>
     </div>
@@ -804,6 +804,7 @@ export default {
         flex-wrap: wrap;
         background: rgb(216, 25, 25);
         font-weight: 600;
+        text-decoration: none;
 
         padding: 1rem 2rem;
         border-radius: 5px;
