@@ -31,7 +31,7 @@
             </li>
             <li v-else class="infos__tags">Tags : Aucun</li>
             <li v-if="prod.maxStreams" class="infos__max-streams">
-              Max streams : {{ prod.maxStreams }}
+              Max streams : {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
             </li>
             <li v-else class="infos__max-streams">Max streams : illimité</li>
             <li class="infos__price">Prix : {{ prod.price }}€</li>
