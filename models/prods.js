@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongooseUniqueValidator = require("mongoose-unique-validator");
 
 const prodsSchema = new mongoose.Schema({
   title: {
@@ -38,7 +39,10 @@ const prodsSchema = new mongoose.Schema({
   },
   price: {
       type: String,
-      required: true
+      required: true,
+      validate(price) {
+        if(isNaN(price)) throw new Error("La valeur est invalide");
+      }
   },
   maxStreams: {
     type: String,

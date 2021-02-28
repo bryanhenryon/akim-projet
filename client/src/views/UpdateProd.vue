@@ -192,6 +192,16 @@ export default {
         this.prod.audioFileError = "";
       }
 
+      if (!this.prod.price) {
+        this.prod.priceError = "Veuillez indiquer un prix";
+        return;
+      } else if (this.prod.price <= 0) {
+        this.prod.priceError = "Veuillez indiquer une valeur positive";
+        return;
+      } else {
+        this.prod.priceError = "";
+      }
+
       this.isLoading = true;
       const bodyFormData = new FormData();
       bodyFormData.append("title", this.prod.title);
@@ -209,7 +219,9 @@ export default {
 
       bodyFormData.append("artist", this.user.username);
 
-      bodyFormData.append("price", Number(this.prod.price).toFixed(2));
+      // Convertit les valeurs décimales à virgules en valeurs décimales à points pour remplir les conditions de validation du back-end (type Number)
+      const replaceCommas = this.prod.price.replace(/,/g, ".");
+      bodyFormData.append("price", Number(replaceCommas).toFixed(2));
 
       bodyFormData.append("maxStreams", this.prod.maxStreams);
 
