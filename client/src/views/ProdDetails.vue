@@ -56,7 +56,8 @@ export default {
       prod: null,
       loaded: false,
       product: {
-        price: null
+        price: null,
+        email: null
       }
     };
   },
@@ -80,59 +81,24 @@ export default {
       this.loaded = true;
       window.paypal
         .Buttons({
-          createOrder: (data, actions) => {
-            return actions.order.create({
-              purchase_units: [
-                {
-                  description: this.product.description,
-                  amount: {
-                    value: this.product.price
-                  }
-                }
-              ]
-            });
+          createOrder: () => {
+            return axios
+              .post(this.apiRoot + "paypal/create-order", {
+                price: this.product.price,
+                email: this.product.email
+              })
+              .then(function(res) {
+                return res.data.orderID;
+              })
+              .catch(err => console.log(err));
           },
-          onApprove: (data, actions) => {
-            const timestamp = new Date().getUTCMilliseconds();
-            const id = timestamp;
-            return actions.order.capture().then(details => {
-              axios
-                .post(
-                  "https://api-m.sandbox.paypal.com/v1/payments/payouts",
-                  {
-                    sender_batch_header: {
-                      sender_batch_id: id,
-                      email_subject: "You have a payout!",
-                      email_message:
-                        "You have received a payout! Thanks for using our service!",
-                      recipient_type: "EMAIL"
-                    },
-                    items: [
-                      {
-                        amount: {
-                          value: this.product.price,
-                          currency: "EUR"
-                        },
-                        note: "Félicitations, quelqu'un a acheté votre prod !",
-                        sender_item_id: id,
-                        receiver: "bryan@issou.com"
-                      }
-                    ]
-                  },
-                  {
-                    headers: {
-                      Authorization:
-                        "Bearer A21AAJooJspkot_5iTUyAfMfKfwu-d-58nHwVe1vgC9EooZGG2EQbk3lSfVqiQiwBm58bqy2_WQYh_BmPl06GrLBq0uHxsDCQ"
-                    }
-                  }
-                )
-                .then(() => {
-                  alert(
-                    "Transaction completed by " + details.payer.name.given_name
-                  );
-                })
-                .catch(err => console.log(err));
-            });
+          onApprove: data => {
+            return axios
+              .post(this.apiRoot + "paypal/capture-order/" + data.orderID)
+              .then(() => {
+                alert("Transaction réussie!");
+              })
+              .catch(err => console.log(err));
           }
         })
         .render(".paypal");
@@ -143,16 +109,27 @@ export default {
     axios
       .get(this.apiRoot + "prod/" + this.$route.params.id)
       .then(res => {
-        this.prod = res.data;
+        const prod = res.data;
+        this.prod = prod;
         this.product.price = res.data.price;
+        return prod;
+      })
+      .then(prod => {
+        axios.get(this.apiRoot + "users/" + prod.artist).then(res => {
+          console.log(res);
+          const email = res.data.email;
+          this.product.email = email;
 
-        const script = document.createElement("script");
-        script.setAttribute(
-          "src",
-          "https://www.paypal.com/sdk/js?client-id=ARrBwGf7HfFOGXrvKTj6-oncPpq_l9ZRkBz4iGfi3KKH2FjvmZaheUK-hesVULH2uTMe2g-9CdEQqbDJ&disable-funding=credit,card&currency=EUR"
-        );
-        script.addEventListener("load", this.setLoaded);
-        document.head.appendChild(script);
+          const script = document.createElement("script");
+          script.setAttribute(
+            "src",
+            "https://www.paypal.com/sdk/js?client-id=ARrBwGf7HfFOGXrvKTj6-oncPpq_l9ZRkBz4iGfi3KKH2FjvmZaheUK-hesVULH2uTMe2g-9CdEQqbDJ&merchant-id=" +
+              email +
+              "&disable-funding=credit,card&currency=EUR"
+          );
+          script.addEventListener("load", this.setLoaded);
+          document.head.appendChild(script);
+        });
       })
       .catch(err => {
         console.log(err);

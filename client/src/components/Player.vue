@@ -374,7 +374,7 @@ export default {
         margin: 0 2rem;
 
         @media (max-width: 480px) {
-          margin: 0.5rem;
+          margin: 1rem;
         }
 
         &.playing {
