@@ -207,11 +207,19 @@ export default {
   flex: 1;
   h1 {
     margin-bottom: 2rem;
+
+    @media (max-width: 480px) {
+      font-size: 2rem;
+    }
   }
 
   .infos {
     list-style: none;
     margin-bottom: 2rem;
+
+    @media (max-width: 480px) {
+      font-size: 1.4rem;
+    }
 
     li {
       margin-bottom: 1.2rem;
