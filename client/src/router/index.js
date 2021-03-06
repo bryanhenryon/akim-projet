@@ -12,65 +12,97 @@ import LegalNotices from "../views/LegalNotices";
 import NotFound from "../views/NotFound";
 import store from "../store";
 
+const siteName = "Projet Akim";
+
 const routes = [
   {
     path: "/",
     name: "Home",
-    component: Home
+    component: Home,
+    meta: {
+      title: `${siteName} - Accueil`
+    }
   },
   {
     path: "/prods",
     name: "Prods",
-    component: Prods
+    component: Prods,
+    meta: {
+      title: `${siteName} - Prods`
+    }
   },
   {
     path: "/prod/:id",
     name: "ProdDetails",
-    component: ProdDetails
+    component: ProdDetails,
+    meta: {
+      title: `${siteName} - Détails`
+    }
   },
   {
     path: "/profil/:username",
     name: "Profile",
-    component: Profile
+    component: Profile,
+    meta: {
+      title: `${siteName} - Profil`
+    }
   },
   {
     path: "/confirmation-transaction",
     name: "TransactionConfirmation",
-    component: TransactionConfirmation
+    component: TransactionConfirmation,
+    meta: {
+      title: `${siteName} - Confirmation`
+    }
   },
   {
     path: "/compte/prods",
     name: "MyProds",
     component: MyProds,
-    meta: { requiresAuth: true }
+    meta: {
+      requiresAuth: true,
+      title: `${siteName} - Mes prods`
+    }
   },
   {
     path: "/compte/prods/ajouter",
     name: "AddProd",
     component: AddProd,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: `${siteName} - Ajouter une prod` }
   },
   {
     path: "/compte/prods/:id",
     name: "UpdateProd",
     component: UpdateProd,
-    meta: { requiresAuth: true }
+    meta: {
+      requiresAuth: true,
+      title: `${siteName} - Modifier une prod`
+    }
   },
   {
     path: "/compte/infos",
     name: "ProfileInfos",
     component: ProfileInfos,
-    meta: { requiresAuth: true }
+    meta: {
+      requiresAuth: true,
+      title: `${siteName} - Mes informations`
+    }
   },
   {
     path: "/mentions-legales",
     name: "LegalNotices",
-    component: LegalNotices
+    component: LegalNotices,
+    meta: {
+      title: `${siteName} - Mentions légales`
+    }
   },
   {
     path: "/:catchAll(.*)",
     name: "NotFound",
-    component: NotFound
+    component: NotFound,
+    meta: {
+      title: `${siteName} - 404`
+    }
   }
 ];
 
@@ -84,6 +116,8 @@ routes.scrollBehavior = () => {
 };
 
 router.beforeEach((to, from, next) => {
+  document.title = to.meta.title;
+
   window.scrollTo(0, 0);
 
   if (to.meta.requiresAuth && !store.state.user) {
