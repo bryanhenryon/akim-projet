@@ -1,7 +1,9 @@
 <template>
   <footer class="footer">
     &copy; {{ copyrightYear }} Setbon Akim &mdash;
-    <a href="#" class="legal-notices-link">Mentions légales</a>
+    <router-link to="/mentions-legales" class="legal-notices-link"
+      >Mentions légales</router-link
+    >
   </footer>
 </template>
 

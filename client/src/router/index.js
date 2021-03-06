@@ -8,6 +8,7 @@ import UpdateProd from "../views/UpdateProd";
 import ProfileInfos from "../views/ProfileInfos";
 import ProdDetails from "../views/ProdDetails";
 import TransactionConfirmation from "../views/TransactionConfirmation";
+import LegalNotices from "../views/LegalNotices";
 import store from "../store";
 
 const routes = [
@@ -59,6 +60,11 @@ const routes = [
     name: "ProfileInfos",
     component: ProfileInfos,
     meta: { requiresAuth: true }
+  },
+  {
+    path: "/mentions-legales",
+    name: "LegalNotices",
+    component: LegalNotices
   }
 ];
 
