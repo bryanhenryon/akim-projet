@@ -65,9 +65,9 @@
           </button>
         </div>
 
-        <a href="#" class="sign-in-modal__forgotten-password"
+        <!-- <a href="#" class="sign-in-modal__forgotten-password"
           >Mot de passe oublié ?</a
-        >
+        > -->
       </div>
     </div>
   </div>

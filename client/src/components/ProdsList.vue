@@ -42,7 +42,7 @@
         </button>
         <div class="sort-by-content ">
           <ul>
-            <li>Les meilleures ventes</li>
+            <!-- <li>Les meilleures ventes</li> -->
             <li @click="sortByLatest">Les plus récents</li>
             <li @click="sortByOldest">Les plus anciens</li>
           </ul>
