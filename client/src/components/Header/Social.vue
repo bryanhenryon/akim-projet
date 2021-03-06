@@ -1,25 +1,25 @@
 <template>
   <ul class="social">
     <li class="social__item">
-      <a href="#" target="_blank" rel="noopener"
+      <a href="https://twitter.com/akimbeats?lang=fr" target="_blank" rel="noopener"
         ><svg class="icon icon-twitter">
           <use xlink:href="sprite.svg#icon-twitter"></use></svg
       ></a>
     </li>
     <li class="social__item">
-      <a href="#" target="_blank" rel="noopener"
+      <a href="https://www.facebook.com/AkimAreYouThere" target="_blank" rel="noopener"
         ><svg class="icon icon-facebook">
           <use xlink:href="sprite.svg#icon-facebook"></use></svg
       ></a>
     </li>
     <li class="social__item">
-      <a href="#" target="_blank" rel="noopener"
+      <a href="https://www.instagram.com/akim.beats/?hl=fr" target="_blank" rel="noopener"
         ><svg class="icon icon-instagram">
           <use xlink:href="sprite.svg#icon-instagram"></use></svg
       ></a>
     </li>
     <li class="social__item">
-      <a href="#" target="_blank" rel="noopener"
+      <a href="https://www.youtube.com/channel/UCotfVZBxdM9Eq4T5VaoJZ2A" target="_blank" rel="noopener"
         ><svg class="icon icon-youtube">
           <use xlink:href="sprite.svg#icon-youtube"></use></svg
       ></a>
