@@ -249,19 +249,36 @@ export default {
         position: relative;
         height: 250px;
 
-        &:hover {
-          .btn--play {
-            display: block;
-            background: rgba($color: #000, $alpha: 0.7);
+        @media (min-width: 1024px) {
+          &:hover {
+            .btn--play {
+              display: block;
+              background: rgba($color: #000, $alpha: 0.7);
 
-            &.active {
-              .icon-controller-play {
-                display: none;
-              }
+              &.active {
+                .icon-controller-play {
+                  display: none;
+                }
 
-              .icon-pause {
-                display: inline;
+                .icon-pause {
+                  display: inline;
+                }
               }
+            }
+          }
+        }
+
+        .btn--play {
+          display: block;
+          background: rgba($color: #000, $alpha: 0.7);
+
+          &.active {
+            .icon-controller-play {
+              display: none;
+            }
+
+            .icon-pause {
+              display: inline;
             }
           }
         }
@@ -284,6 +301,11 @@ export default {
           left: 0;
           right: 0;
           bottom: 0;
+
+          @media (max-width: 1024px) {
+            display: block;
+            background: rgba($color: #000, $alpha: 0.7);
+          }
 
           .icon-controller-play,
           .icon-pause {
