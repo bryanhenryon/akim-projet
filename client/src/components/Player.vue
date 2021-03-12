@@ -11,9 +11,13 @@
           />
         </div>
         <div class="track-infos__container">
-          <div v-if="song" class="track-infos__track-name">
+          <router-link
+            v-if="song"
+            class="track-infos__track-name"
+            :to="'/prod/' + song.id"
+          >
             {{ song.title }}
-          </div>
+          </router-link>
           <router-link
             :to="'/profil/' + song.artist"
             v-if="song"
@@ -183,13 +187,16 @@ export default {
         }
       }
 
+      const nextSongId = nextCard.querySelector(".btn--buy").dataset.id;
+
       const playingSong = {
         target: nextTarget,
         targetIndex: nextIndex,
         artist: artist,
         title: title,
         image: nextTarget.previousSibling.src,
-        audio: audio
+        audio: audio,
+        id: nextSongId
       };
 
       this.$store.dispatch("player/playingSong", playingSong);
@@ -246,13 +253,16 @@ export default {
         }
       }
 
+      const nextSongId = nextCard.querySelector(".btn--buy").dataset.id;
+
       const playingSong = {
         target: nextTarget,
         targetIndex: nextIndex,
         artist: artist,
         title: title,
         image: nextTarget.previousSibling.src,
-        audio: audio
+        audio: audio,
+        id: nextSongId
       };
 
       this.$store.dispatch("player/playingSong", playingSong);
@@ -320,6 +330,9 @@ export default {
       &__track-name {
         font-weight: 500;
         margin-bottom: 0.5rem;
+        display: block;
+        text-decoration: none;
+        color: inherit;
 
         @media (max-width: 480px) {
           font-size: 1.4rem;

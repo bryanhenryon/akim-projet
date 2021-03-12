@@ -154,7 +154,10 @@
               draggable="false"
               alt="Couverture de la prod"
             />
-            <button class="btn btn--play" @click="play(index, $event)">
+            <button
+              class="btn btn--play"
+              @click="play(index, prod._id, $event)"
+            >
               <svg class="icon icon-controller-play">
                 <use xlink:href="sprite.svg#icon-controller-play"></use>
               </svg>
@@ -175,9 +178,9 @@
           </div>
           <div class="bottom">
             <div class="infos">
-              <div class="title">
+              <router-link :to="'/prod/' + prod._id" class="title">
                 {{ prod.title }}
-              </div>
+              </router-link>
               <div class="author">
                 <router-link
                   class="author-profile-link"
@@ -192,7 +195,11 @@
               <div v-else class="max-streams">Max streams: illimité</div>
               <span class="format">{{ prod.format.toUpperCase() }}</span>
             </div>
-            <router-link :to="'/prod/' + prod._id" class="btn btn--buy">
+            <router-link
+              :to="'/prod/' + prod._id"
+              class="btn btn--buy"
+              :data-id="prod._id"
+            >
               <span>{{ prod.price }}€</span>
               <svg class="icon icon-shopping-cart">
                 <use xlink:href="sprite.svg#icon-shopping-cart"></use>
@@ -425,7 +432,7 @@ export default {
           console.log(error);
         });
     },
-    play(index, $event) {
+    play(index, id, $event) {
       document.querySelector(".player").classList.add("playing");
       document.querySelector(".btn--play2").classList.add("playing");
 
@@ -471,7 +478,8 @@ export default {
         artist: artist,
         title: title,
         image: $event.currentTarget.previousSibling.src,
-        audio: audio
+        audio: audio,
+        id
       };
 
       this.$store.dispatch("player/playingSong", playingSong);
@@ -921,6 +929,12 @@ export default {
             font-weight: 500;
             font-size: 1.8rem;
             margin-bottom: 0.5rem;
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+              text-decoration: underline;
+            }
           }
 
           .author {
