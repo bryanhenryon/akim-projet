@@ -19,28 +19,22 @@
                 prod.artist
               }}</router-link>
             </li>
-            <li class="infos__creation">Ajoutée le : {{ prodCreationDate }}</li>
             <li>
               Format :
               <span class="infos__format">{{ prod.format.toUpperCase() }}</span>
             </li>
-            <li v-if="prod.tags.length !== 0" class="infos__tags">
-              Tags :
-              <span v-for="(tag, index) of prod.tags" :key="index">{{
-                tag
-              }}</span>
-            </li>
-            <li v-else class="infos__tags">Tags : Aucun</li>
             <li v-if="prod.maxStreams" class="infos__max-streams">
               Max streams :
               {{ prod.maxStreams.replace(/\B(?=(\d{3})+(?!\d))/g, " ") }}
             </li>
             <li v-else class="infos__max-streams">Max streams : illimité</li>
-            <li class="infos__price">Prix : {{ prod.price }}€</li>
+            <li class="infos__price">
+              Prix : <b>{{ prod.price }}€</b>
+            </li>
           </ul>
-          <div class="paypal"></div>
         </div>
       </div>
+      <div class="paypal"></div>
     </div>
     <app-footer></app-footer>
   </div>
@@ -85,6 +79,9 @@ export default {
       this.loaded = true;
       window.paypal
         .Buttons({
+          style: {
+            height: 45
+          },
           createOrder: () => {
             return axios
               .post(this.apiRoot + "paypal/create-order", {
@@ -166,6 +163,10 @@ export default {
   }
 }
 
+.paypal {
+  margin-top: 2rem;
+}
+
 .container {
   max-width: 600px;
   margin: 10rem auto;
@@ -222,7 +223,7 @@ export default {
     }
 
     li {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
 
       a {
         color: inherit;
