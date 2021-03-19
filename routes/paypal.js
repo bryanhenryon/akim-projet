@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const paypal = require('@paypal/checkout-server-sdk');
 
-let clientId = "ARrBwGf7HfFOGXrvKTj6-oncPpq_l9ZRkBz4iGfi3KKH2FjvmZaheUK-hesVULH2uTMe2g-9CdEQqbDJ";
-let clientSecret = "EOMiHbfANra0mzQ6r9kf3acLnADS7S7rIBlYvLw_MLDzrbMaNHUvoM5LD_ueMc83tCGP6GMAAenqlytL";
+let clientId = process.env.PAYPAL_CLIENT_ID;
+let clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 let environment = new paypal.core.SandboxEnvironment(clientId, clientSecret);
 let client = new paypal.core.PayPalHttpClient(environment);
 

@@ -90,6 +90,8 @@ export default {
 
 <style lang="scss" scoped>
 .transaction-confirmation {
+  display: flex;
+  flex-direction: column;
   color: $color-white;
   background: linear-gradient(rgba(rgb(0, 0, 0), 0.7), rgba($color-black, 1)),
     url("../assets/img/profile-background.jpg") center center fixed;
@@ -103,6 +105,10 @@ export default {
 
   @media (max-width: 320px) {
     padding: 0 1rem;
+  }
+
+  .container {
+    flex: 1;
   }
 
   &__main-message {
