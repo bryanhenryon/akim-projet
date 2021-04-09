@@ -68,7 +68,7 @@
         </div>
         <div class="form-group" data-name="tags-input">
           <label for="tags"
-            >Tags <span class="indicator">(optionnel)</span></label
+            >Tags <span class="indicator">(optionnel — séparés par des virgules)</span></label
           >
           <div class="tags-container">
             <span v-for="(tag, index) of prod.tags" :key="index" class="tag">
