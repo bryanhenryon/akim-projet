@@ -1,64 +1,60 @@
 <template>
-  <div class="sign-in-modal">
-    <div class="sign-in-modal__content">
+  <div class="forgotten-password-modal">
+    <div class="forgotten-password-modal__content">
       <button
-        class="btn sign-in-modal__close-modal-btn"
-        @click="closeSignInModal"
+        class="btn forgotten-password-modal__close-modal-btn"
+        @click="closeForgottenPasswordModal"
       >
         <svg class="icon icon-cross">
           <use xlink:href="sprite.svg#icon-cross"></use>
         </svg>
       </button>
-      <div class="sign-in-modal__content-wrapper">
-        <h2 class="sign-in-modal__header">Connexion</h2>
-        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-        <form class="sign-in-modal__form" @submit.prevent="signIn">
-          <div class="sign-in-modal__form-group">
+      <div class="forgotten-password-modal__content-wrapper">
+        <h2 class="forgotten-password-modal__header">
+          Réinitialiser le mot de passe
+        </h2>
+        <form
+          class="forgotten-password-modal__form"
+          @submit.prevent="resetPassword"
+        >
+          <div class="forgotten-password-modal__form-group">
+            <label
+              for="forgotten-password-email"
+              class="forgotten-password-modal__label"
+              >Indiquez votre email afin de recevoir un lien de
+              réinitialisation</label
+            >
             <svg class="icon icon-email">
               <use xlink:href="sprite.svg#icon-email"></use>
             </svg>
-            <label for="sign-in-email" class="sign-in-modal__label"
-              >Email</label
-            >
             <input
               type="text"
               name="email"
-              id="sign-in-email"
-              class="sign-in-modal__text-input"
+              id="forgotten-password-email"
+              class="forgotten-password-modal__text-input"
               placeholder="Entrez votre email"
               v-model="email"
             />
-          </div>
-
-          <div class="sign-in-modal__form-group">
-            <svg class="icon icon-lock">
-              <use xlink:href="sprite.svg#icon-lock"></use>
-            </svg>
-            <label for="sign-in-password" class="sign-in-modal__label"
-              >Mot de passe</label
+            <div
+              v-if="errorMessage"
+              class="forgotten-password-modal__input-error-message"
             >
-            <input
-              type="password"
-              name="password"
-              id="sign-in-password"
-              class="sign-in-modal__text-input"
-              placeholder="Entrez votre mot de passe"
-              v-model="password"
-            />
+              {{ errorMessage }}
+            </div>
           </div>
           <button
             :disabled="isLoading"
-            class="btn sign-in-modal__sign-in-btn"
-            @click="signIn"
+            class="btn forgotten-password-modal__forgotten-password-btn"
           >
-            <span v-if="!isLoading">Se connecter</span>
+            <span v-if="!isLoading">Envoyer</span>
             <app-facebook-spinner v-else></app-facebook-spinner>
           </button>
         </form>
-        <div class="sign-in-modal__not-registered">
+
+        <div class="forgotten-password-modal__not-registered">
           Pas encore inscris ?
           <button
-            class="btn sign-in-modal__sign-up-btn"
+            class="btn forgotten-password-modal__sign-up-btn"
             @click="showSignUpModal"
           >
             Cliquez-ici !
@@ -66,10 +62,10 @@
         </div>
 
         <button
-          class="btn sign-in-modal__forgotten-password"
-          @click="showForgottenPasswordModal"
+          class="btn forgotten-password-modal__sign-in"
+          @click="showSignInModal"
         >
-          Mot de passe oublié ?
+          Se connecter
         </button>
       </div>
     </div>
@@ -78,63 +74,33 @@
 
 <script>
 import FacebookSpinner from "./spinners/FacebookSpinner";
-import { mapFields } from "vuex-map-fields";
-import { mapGetters } from "vuex";
-import axios from "axios";
-import "animate.css";
+
 export default {
   data() {
     return {
-      isLoading: false
+      email: "",
+      isLoading: false,
+      errorMessage: null
     };
   },
-  components: {
-    "app-facebook-spinner": FacebookSpinner
-  },
-  computed: {
-    ...mapGetters("signInModal", {
-      errorMessage: "getErrorMessage"
-    }),
-    ...mapGetters("global", {
-      apiRoot: "getApiRoot"
-    }),
-    ...mapFields("signInModal", ["email", "password"])
-  },
   methods: {
-    signIn() {
-      this.isLoading = true;
-      axios
-        .post(this.apiRoot + "users/login", {
-          email: this.email,
-          password: this.password
-        })
-        .then(res => {
-          this.isLoading = false;
-          this.$store.dispatch("signInModal/resetForm");
-
-          localStorage.setItem("jwt", res.data.token);
-          localStorage.setItem("user", JSON.stringify(res.data.user));
-
-          this.$store.dispatch("setToken", localStorage.getItem("jwt"));
-          this.$store.dispatch(
-            "setUser",
-            JSON.parse(localStorage.getItem("user"))
-          );
-
-          const signInModal = document.querySelector(".sign-in-modal");
-          signInModal.classList.remove("active");
-        })
-        .catch(error => {
-          this.isLoading = false;
-          this.$store.dispatch(
-            "signInModal/setErrorMessage",
-            error.response.data.error
-          );
-        });
+    resetForgottenPasswordForm() {
+      this.email = "";
+      this.errorMessage = "";
     },
-    closeSignInModal() {
-      document.querySelector(".sign-in-modal").classList.remove("active");
-      this.$store.dispatch("signInModal/resetForm");
+    resetPassword() {
+      if (this.email === "") {
+        return (this.errorMessage = "Veuillez indiquer votre email");
+      } else {
+        this.errorMessage = "";
+      }
+    },
+
+    closeForgottenPasswordModal() {
+      document
+        .querySelector(".forgotten-password-modal")
+        .classList.remove("active");
+      this.resetForgottenPasswordForm();
     },
     showSignUpModal() {
       const signUpModal = document.querySelector(".sign-up-modal");
@@ -152,7 +118,7 @@ export default {
       signInModal.classList.remove("active");
       signUpModal.classList.add("active");
 
-      this.$store.dispatch("signInModal/resetForm");
+      this.resetForgottenPasswordForm();
 
       if (signUpModal.classList.contains("active")) {
         window.addEventListener("click", e => {
@@ -164,32 +130,44 @@ export default {
         });
       }
     },
-    showForgottenPasswordModal() {
-      const forgottenPasswordModal = document.querySelector(
-        ".forgotten-password-modal"
-      );
-      forgottenPasswordModal.classList.add("active");
 
+    showSignInModal() {
       const signInModal = document.querySelector(".sign-in-modal");
-      signInModal.classList.remove("active");
-      this.$store.dispatch("signInModal/resetForm");
+      const signInModalContent = document.querySelector(
+        ".sign-in-modal__content"
+      );
+      const signUpModal = document.querySelector(".sign-up-modal");
 
-      if (forgottenPasswordModal.classList.contains("active")) {
+      signInModalContent.classList.remove(
+        "animate__animated",
+        "animate__slideInDown",
+        "animate__faster"
+      );
+
+      signInModal.classList.add("active");
+      signUpModal.classList.remove("active");
+
+      this.resetForgottenPasswordForm();
+
+      if (signInModal.classList.contains("active")) {
         window.addEventListener("click", e => {
-          if (e.target === forgottenPasswordModal) {
-            forgottenPasswordModal.classList.remove("active");
+          if (e.target === signInModal) {
+            signInModal.classList.remove("active");
           } else {
             return false;
           }
         });
       }
     }
+  },
+  components: {
+    "app-facebook-spinner": FacebookSpinner
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.sign-in-modal {
+.forgotten-password-modal {
   display: none;
   color: $color-white;
   position: fixed;
@@ -257,16 +235,6 @@ export default {
     margin-bottom: 3rem;
   }
 
-  .error-message {
-    background-color: #f2dede;
-    border-color: #ebccd1;
-    color: #a94442;
-    padding: 15px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    text-align: center;
-  }
-
   &__form-group {
     margin: 3rem auto;
     position: relative;
@@ -277,14 +245,14 @@ export default {
     width: 15px;
     fill: #474646;
     position: absolute;
-    top: 34px;
-    left: 10px;
+    top: 57px;
+    left: 12px;
   }
 
   &__label {
     display: block;
     font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   &__text-input {
@@ -305,7 +273,7 @@ export default {
     margin: 5px 0;
   }
 
-  &__sign-in-btn {
+  &__forgotten-password-btn {
     background: #ff3a51;
     color: $color-white;
     width: 100%;
@@ -327,7 +295,7 @@ export default {
     text-decoration: underline;
   }
 
-  &__forgotten-password {
+  &__sign-in {
     font-size: 1.4rem;
     text-align: center;
     margin: 0 auto;
