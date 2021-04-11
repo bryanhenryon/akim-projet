@@ -4,7 +4,7 @@ const state = {
   email: null,
   password: null,
   errorMessage: null,
-  passwordSuccessfullyReset: true
+  passwordSuccessfullyReset: false
 };
 
 const getters = {
