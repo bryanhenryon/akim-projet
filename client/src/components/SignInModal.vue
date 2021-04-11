@@ -12,6 +12,13 @@
       <div class="sign-in-modal__content-wrapper">
         <h2 class="sign-in-modal__header">Connexion</h2>
         <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+        <div
+          v-if="passwordSuccessfullyReset && !errorMessage"
+          class="password-successfully-reset"
+        >
+          Votre mot de passe a correctement été modifié, vous pouvez à présent
+          vous connecter
+        </div>
         <form class="sign-in-modal__form" @submit.prevent="signIn">
           <div class="sign-in-modal__form-group">
             <svg class="icon icon-email">
@@ -93,7 +100,8 @@ export default {
   },
   computed: {
     ...mapGetters("signInModal", {
-      errorMessage: "getErrorMessage"
+      errorMessage: "getErrorMessage",
+      passwordSuccessfullyReset: "getPasswordSuccessfullyReset"
     }),
     ...mapGetters("global", {
       apiRoot: "getApiRoot"
@@ -135,6 +143,7 @@ export default {
     closeSignInModal() {
       document.querySelector(".sign-in-modal").classList.remove("active");
       this.$store.dispatch("signInModal/resetForm");
+      this.$store.dispatch("signInModal/setPasswordSuccessfullyResetToFalse");
     },
     showSignUpModal() {
       const signUpModal = document.querySelector(".sign-up-modal");
@@ -261,6 +270,16 @@ export default {
     background-color: #f2dede;
     border-color: #ebccd1;
     color: #a94442;
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .password-successfully-reset {
+    background-color: #c9f9d5;
+    border-color: #ebccd1;
+    color: #4f8c5d;
     padding: 15px;
     border: 1px solid transparent;
     border-radius: 4px;

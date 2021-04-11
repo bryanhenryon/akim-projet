@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middlewares/auth");
 const multer = require("multer");
 const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
 
 const router = express.Router();
 
@@ -224,5 +225,77 @@ router.patch("/api/users/me/new-password", auth, async (req, res) => {
         res.status(400).send();
     }
 })
+
+router.post("/api/reset_password", async (req, res) => {
+    try {
+        const user = await Users.findOne({ email: req.body.email });
+        const token = jwt.sign({ user }, process.env.JWT_RESET_PASSWORD_SECRET, { expiresIn: '12h' });
+        user.token = token;
+        await user.save();
+
+        let transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+                user: "streamaker.contact@gmail.com",
+                pass: process.env.GMAIL_PASSWORD
+            },
+        });
+
+        await transporter.sendMail({
+            from: '"Streamaker 🎧" <streamaker.contact@gmail.com>', 
+            to: req.body.email, 
+            subject: "Réinitialisation du mot de passe", 
+            html: `
+            Bonjour ${user.username},
+            <br><br>
+            Ce mail fait suite à votre demande de réinitialisation de mot de passe. 
+            <br><br>
+            Cliquez sur le lien ci-dessous afin d'en définir un nouveau (ce lien expirera sous 24 heures) : 
+            <br><br>
+            <a href="https://streamaker.herokuapp.com/nouveau-mot-de-passe/${token}">https://streamaker.herokuapp.com/nouveau-mot-de-passe/${token}</a>
+            <br><br>
+            Si vous n'avez pas fait cette demande, ignorez simplement ce mail.
+            <br><br>
+            À bientôt !
+            <br><br>
+            Streamaker
+            `, 
+        });
+        
+        res.send("Mot de passe réinitialisé");
+        
+    } catch (error) {
+        console.log(error);
+        res.send(error);
+    }
+});
+
+router.post("/api/check-reset-token/:token", async (req, res) => {
+    try {
+        let decoded = jwt.verify(req.body.token, process.env.JWT_RESET_PASSWORD_SECRET);
+        const user = await Users.findOne({ _id: decoded.user._id });
+
+        if(!user) throw new Error("Utilisateur non trouvé");
+
+        res.send(user);
+    } catch (error) {
+        console.log(error);
+        res.send(error)
+    }
+});
+
+router.patch("/api/reset-user-password/:id", async (req, res) => {
+    try {
+        const user = await Users.findOne({ _id: req.params.id });
+        user.password = await bcrypt.hash(req.body.newPassword, 10);
+        user.save();
+        res.send();
+    } catch (error) {
+        res.send(error);
+        console.log(error);
+    }
+});
 
 module.exports = router;

@@ -14,6 +14,7 @@
           Réinitialiser le mot de passe
         </h2>
         <form
+          v-if="!passwordResetMailSent"
           class="forgotten-password-modal__form"
           @submit.prevent="resetPassword"
         >
@@ -51,6 +52,22 @@
           </button>
         </form>
 
+        <div
+          v-if="passwordResetMailSent"
+          class="forgotten-password-modal__password-sent"
+        >
+          Un mail de vient de vous être envoyé ! N'oubliez pas de vérifier vos
+          spams s'il n'apparait pas.
+        </div>
+
+        <button
+          @click="closeForgottenPasswordModal"
+          v-if="passwordResetMailSent"
+          class="btn forgotten-password-modal__close-forgotten-password-modal-btn"
+        >
+          <span>OK</span>
+        </button>
+
         <div class="forgotten-password-modal__not-registered">
           Pas encore inscris ?
           <button
@@ -73,26 +90,42 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import FacebookSpinner from "./spinners/FacebookSpinner";
+import axios from "axios";
 
 export default {
   data() {
     return {
       email: "",
       isLoading: false,
-      errorMessage: null
+      errorMessage: null,
+      passwordResetMailSent: false
     };
+  },
+  computed: {
+    ...mapGetters("global", {
+      apiRoot: "getApiRoot"
+    })
   },
   methods: {
     resetForgottenPasswordForm() {
       this.email = "";
       this.errorMessage = "";
     },
-    resetPassword() {
+    async resetPassword() {
       if (this.email === "") {
         return (this.errorMessage = "Veuillez indiquer votre email");
       } else {
         this.errorMessage = "";
+        this.isLoading = true;
+
+        await axios.post(this.apiRoot + "reset_password", {
+          email: this.email
+        });
+
+        this.isLoading = false;
+        this.passwordResetMailSent = true;
       }
     },
 
@@ -101,8 +134,9 @@ export default {
         .querySelector(".forgotten-password-modal")
         .classList.remove("active");
       this.resetForgottenPasswordForm();
+      this.passwordResetMailSent = false;
     },
-    showSignUpModal() {
+    showSignModal() {
       const signUpModal = document.querySelector(".sign-up-modal");
       const signUpModalContent = document.querySelector(
         ".sign-up-modal__content"
@@ -118,7 +152,7 @@ export default {
       signInModal.classList.remove("active");
       signUpModal.classList.add("active");
 
-      this.resetForgottenPasswordForm();
+      this.closeForgottenPasswordModal();
 
       if (signUpModal.classList.contains("active")) {
         window.addEventListener("click", e => {
@@ -147,7 +181,7 @@ export default {
       signInModal.classList.add("active");
       signUpModal.classList.remove("active");
 
-      this.resetForgottenPasswordForm();
+      this.closeForgottenPasswordModal();
 
       if (signInModal.classList.contains("active")) {
         window.addEventListener("click", e => {
@@ -273,7 +307,8 @@ export default {
     margin: 5px 0;
   }
 
-  &__forgotten-password-btn {
+  &__forgotten-password-btn,
+  &__close-forgotten-password-modal-btn {
     background: #ff3a51;
     color: $color-white;
     width: 100%;
@@ -307,6 +342,10 @@ export default {
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  &__password-sent {
+    margin-bottom: 2rem;
   }
 }
 </style>

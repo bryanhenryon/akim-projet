@@ -11,6 +11,7 @@ import TransactionConfirmation from "../views/TransactionConfirmation";
 import LegalNotices from "../views/LegalNotices";
 import NotFound from "../views/NotFound";
 import store from "../store";
+import ResetPassword from "../views/ResetPassword";
 
 const siteName = "Streamaker";
 
@@ -94,6 +95,14 @@ const routes = [
     component: LegalNotices,
     meta: {
       title: `Mentions légales | ${siteName}`
+    }
+  },
+  {
+    path: "/nouveau-mot-de-passe/:token",
+    name: "ResetPassword",
+    component: ResetPassword,
+    meta: {
+      title: `Nouveau mot de passe | ${siteName}`
     }
   },
   {

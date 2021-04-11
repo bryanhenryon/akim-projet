@@ -70,6 +70,9 @@ const usersSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  token: {
+    type: String
+  }
 }, { timestamps: true });
 
 usersSchema.plugin(uniqueValidator);
@@ -78,6 +81,7 @@ usersSchema.methods.toJSON = function () {
   const userObject = this.toObject();
 
   delete userObject.password;
+  delete userObject.token;
 
   return userObject
 }
